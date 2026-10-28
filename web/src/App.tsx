@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ApiError, getConfig, runNow, saveConfig } from './api/client'
-import type { Config, LatLng } from './api/types'
+import type { Config, LatLng, RunNowResponse } from './api/types'
 import { MapView } from './map/MapView'
 import { RoutePanel } from './routes-panel/RoutePanel'
 import {
@@ -35,7 +35,8 @@ function App() {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
   const [runStatus, setRunStatus] = useState<RunStatus>('idle')
-  const [runMessage, setRunMessage] = useState<string | null>(null)
+  const [runResult, setRunResult] = useState<RunNowResponse | null>(null)
+  const [runError, setRunError] = useState<string | null>(null)
 
   useEffect(() => {
     getConfig()
@@ -71,14 +72,14 @@ function App() {
 
   async function handleRunNow() {
     setRunStatus('running')
-    setRunMessage(null)
+    setRunError(null)
     try {
       const result = await runNow()
       setRunStatus('done')
-      setRunMessage(result.message)
+      setRunResult(result)
     } catch (err) {
       setRunStatus('error')
-      setRunMessage(err instanceof ApiError ? err.message : 'Could not send ETAs')
+      setRunError(err instanceof ApiError ? err.message : 'Could not send ETAs')
     }
   }
 
@@ -146,8 +147,10 @@ function App() {
         >
           Save
         </button>
-        {saveStatus === 'saved' && <p>Saved.</p>}
-        {saveStatus === 'error' && <p>Could not save: {saveError}</p>}
+        {saveStatus === 'saved' && <p className="status-message">Saved.</p>}
+        {saveStatus === 'error' && (
+          <p className="status-message error">Could not save: {saveError}</p>
+        )}
 
         <button
           type="button"
@@ -156,8 +159,28 @@ function App() {
         >
           Send ETAs now
         </button>
-        {runStatus === 'done' && <p>Sent: {runMessage}</p>}
-        {runStatus === 'error' && <p>Could not send ETAs: {runMessage}</p>}
+        {runStatus === 'done' && runResult && (
+          <ul className="run-result">
+            {runResult.results.map((result) => {
+              const color = state.routes.find((r) => r.name === result.name)?.color
+              const failed = result.minutes === null
+              return (
+                <li
+                  key={result.name}
+                  className={`run-result-chip${failed ? ' failed' : ''}`}
+                  title={failed ? (result.error ?? undefined) : undefined}
+                >
+                  <span className="route-color-swatch" style={{ background: color }} />
+                  <span>{result.name}</span>
+                  <span className="eta">{failed ? '?' : `${result.minutes} min`}</span>
+                </li>
+              )
+            })}
+          </ul>
+        )}
+        {runStatus === 'error' && (
+          <p className="status-message error">Could not send ETAs: {runError}</p>
+        )}
       </div>
     </div>
   )

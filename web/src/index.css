@@ -90,3 +90,40 @@ body {
   border: 2px solid white;
   box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
 }
+
+.status-message {
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+
+.status-message.error {
+  color: #b91c1c;
+}
+
+.run-result {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.run-result-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+.run-result-chip .eta {
+  font-weight: 600;
+}
+
+.run-result-chip.failed .eta {
+  color: #b91c1c;
+}

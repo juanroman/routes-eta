@@ -40,11 +40,14 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
-  it('sends the ETAs now and shows the returned message', async () => {
+  it('sends the ETAs now and shows a chip per route', async () => {
     vi.spyOn(apiClient, 'getConfig').mockResolvedValue(EMPTY_CONFIG)
     vi.spyOn(apiClient, 'runNow').mockResolvedValue({
       message: 'City 56 · Mordor ?',
-      results: [],
+      results: [
+        { name: 'City', minutes: 56, error: null },
+        { name: 'Mordor', minutes: null, error: 'timeout' },
+      ],
     })
 
     render(<App />)
@@ -52,7 +55,10 @@ describe('App', () => {
 
     fireEvent.click(screen.getByText('Send ETAs now'))
 
-    expect(await screen.findByText('Sent: City 56 · Mordor ?')).toBeInTheDocument()
+    expect(await screen.findByText('City')).toBeInTheDocument()
+    expect(await screen.findByText('56 min')).toBeInTheDocument()
+    expect(await screen.findByText('Mordor')).toBeInTheDocument()
+    expect(await screen.findByText('?')).toBeInTheDocument()
   })
 
   it('shows an error when sending the ETAs fails', async () => {
