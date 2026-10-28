@@ -1,0 +1,22 @@
+# Phase 0 illustrative route (Mexico City). Not the owner's real commute —
+# swap in real work/home/via coordinates later for Phase 1 and gitignore this
+# file at that point, since it would then encode a real home/work location.
+timezone: America/Mexico_City
+origin:
+  label: Work (Paseo de la Reforma / Torre Mayor)
+  lat: 19.4284
+  lng: -99.1677
+destination:
+  label: Home (Ciudad Satélite)
+  lat: 19.5095
+  lng: -99.2383
+routes:
+  - name: City
+    via:
+      - { lat: 19.4550, lng: -99.2050 } # Anillo Periférico
+  - name: Mordor
+    via:
+      - { lat: 19.4700, lng: -99.1850 } # Calzada Vallejo shortcut
+  - name: Toll Road
+    via:
+      - { lat: 19.4850, lng: -99.2150 } # Viaducto Bicentenario (tolled)
