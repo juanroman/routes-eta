@@ -1,0 +1,8 @@
+.claude/
+.venv/
+__pycache__/
+*.pyc
+.env
+phase0/logs/*
+!phase0/logs/.gitkeep
+.DS_Store
