@@ -1,0 +1,28 @@
+# Illustrative example only (Mexico City, same route as phase0/config.yaml).
+# The real config.yaml is created by the app when you save routes in the
+# builder, and is gitignored since it encodes your real home/work location.
+timezone: America/Mexico_City
+schedule:
+  weekdays: [mon, tue, wed, thu, fri]
+  time: "18:30"
+origin:
+  label: Work (Paseo de la Reforma / Torre Mayor)
+  lat: 19.4284
+  lng: -99.1677
+destination:
+  label: Home (Ciudad Satélite)
+  lat: 19.5095
+  lng: -99.2383
+routes:
+  - name: City
+    color: "#2563eb"
+    via:
+      - { lat: 19.4550, lng: -99.2050 }
+  - name: Mordor
+    color: "#dc2626"
+    via:
+      - { lat: 19.4700, lng: -99.1850 }
+  - name: Toll Road
+    color: "#16a34a"
+    via:
+      - { lat: 19.4850, lng: -99.2150 }

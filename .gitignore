@@ -6,3 +6,6 @@ __pycache__/
 phase0/logs/*
 !phase0/logs/.gitkeep
 .DS_Store
+api/config.yaml
+node_modules/
+web/dist/

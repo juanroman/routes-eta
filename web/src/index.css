@@ -1,0 +1,92 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+}
+
+.app-layout {
+  display: flex;
+  height: 100%;
+}
+
+.map-pane {
+  flex: 1 1 auto;
+}
+
+.side-panel {
+  flex: 0 0 380px;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.origin-destination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.origin-destination-controls button.active {
+  outline: 2px solid #2563eb;
+}
+
+.route-panel ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.route-list-item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+}
+
+.route-list-item input[aria-label='Route name'] {
+  flex: 1 1 80px;
+  min-width: 0;
+}
+
+.route-color-swatch {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  flex: none;
+}
+
+.route-status {
+  font-size: 0.8rem;
+  color: #555;
+  flex: 1 1 100%;
+  order: 1;
+}
+
+/* Large touch target for via-point drag handles (prd.md FR-10). */
+.via-point-handle span {
+  display: block;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+}
