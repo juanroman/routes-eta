@@ -33,23 +33,25 @@ LOG_DIR = SCRIPT_DIR / "logs"
 LOG_PATH = LOG_DIR / "validate_api_log.jsonl"
 
 COMPUTE_ROUTES_URL = "https://routes.googleapis.com/directions/v2:computeRoutes"
-FIELD_MASK = "routes.duration,routes.distanceMeters,routes.polyline.encodedPolyline"
-REQUIRED_FIELDS = ("duration", "distanceMeters", "polyline")
+# staticDuration is the traffic-free baseline Google always computes alongside
+# the traffic-aware `duration` in the SAME response — no need for a second,
+# TRAFFIC_UNAWARE request just to get a comparison figure (PRD Q3).
+FIELD_MASK = (
+    "routes.duration,routes.staticDuration,routes.distanceMeters,"
+    "routes.polyline.encodedPolyline"
+)
+REQUIRED_FIELDS = ("duration", "staticDuration", "distanceMeters", "polyline")
 REQUEST_TIMEOUT_S = 15
-
-# One TRAFFIC_AWARE call (the critical Q1 test) plus one TRAFFIC_UNAWARE
-# baseline per route, so a single run already shows whether traffic-aware
-# durations differ sensibly from a traffic-blind estimate (PRD Q3).
-CALL_TYPES = ("TRAFFIC_AWARE", "TRAFFIC_UNAWARE")
+ROUTING_PREFERENCE = "TRAFFIC_AWARE"
 
 
 @dataclass
-class RouteCallResult:
+class RouteResult:
     route_name: str
-    call_type: str
     ok: bool
     http_status: int | None = None
     duration_s: int | None = None
+    static_duration_s: int | None = None
     distance_m: int | None = None
     polyline: str | None = None
     missing_fields: list[str] = field(default_factory=list)
@@ -60,6 +62,12 @@ class RouteCallResult:
         if self.duration_s is None:
             return None
         return round(self.duration_s / 60)
+
+    @property
+    def static_duration_min(self) -> float | None:
+        if self.static_duration_s is None:
+            return None
+        return round(self.static_duration_s / 60)
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -82,7 +90,7 @@ def build_request_body(
     origin: dict[str, float],
     destination: dict[str, float],
     via_points: list[dict[str, float]],
-    routing_preference: str,
+    routing_preference: str = ROUTING_PREFERENCE,
 ) -> dict[str, Any]:
     def waypoint(point: dict[str, float], via: bool = False) -> dict[str, Any]:
         wp: dict[str, Any] = {
@@ -119,20 +127,19 @@ def call_compute_routes(api_key: str, body: dict[str, Any]) -> requests.Response
     )
 
 
-def run_one_call(
-    api_key: str, route_name: str, call_type: str, body: dict[str, Any]
-) -> RouteCallResult:
+def _parse_duration_seconds(raw: Any) -> int | None:
+    return int(raw.rstrip("s")) if isinstance(raw, str) else None
+
+
+def run_route_call(api_key: str, route_name: str, body: dict[str, Any]) -> RouteResult:
     try:
         response = call_compute_routes(api_key, body)
     except requests.RequestException as exc:
-        return RouteCallResult(
-            route_name=route_name, call_type=call_type, ok=False, error=str(exc)
-        )
+        return RouteResult(route_name=route_name, ok=False, error=str(exc))
 
     if response.status_code != 200:
-        return RouteCallResult(
+        return RouteResult(
             route_name=route_name,
-            call_type=call_type,
             ok=False,
             http_status=response.status_code,
             error=_single_line(response.text, max_len=160),
@@ -142,26 +149,22 @@ def run_one_call(
         payload = response.json()
         route = payload["routes"][0]
     except (ValueError, KeyError, IndexError) as exc:
-        return RouteCallResult(
+        return RouteResult(
             route_name=route_name,
-            call_type=call_type,
             ok=False,
             http_status=response.status_code,
             error=f"Unexpected response shape: {exc}",
         )
 
     missing = [f for f in REQUIRED_FIELDS if f not in route]
-    duration_raw = route.get("duration")  # e.g. "1234s"
-    duration_s = (
-        int(duration_raw.rstrip("s")) if isinstance(duration_raw, str) else None
-    )
+    duration_s = _parse_duration_seconds(route.get("duration"))
 
-    return RouteCallResult(
+    return RouteResult(
         route_name=route_name,
-        call_type=call_type,
         ok=duration_s is not None,
         http_status=response.status_code,
         duration_s=duration_s,
+        static_duration_s=_parse_duration_seconds(route.get("staticDuration")),
         distance_m=route.get("distanceMeters"),
         polyline=route.get("polyline", {}).get("encodedPolyline"),
         missing_fields=missing,
@@ -206,9 +209,8 @@ def write_geojson(route_name: str, encoded_polyline: str, timestamp: str) -> Pat
     return out_path
 
 
-def evaluate_verdicts(results: list[RouteCallResult]) -> dict[str, bool]:
-    traffic_aware = [r for r in results if r.call_type == "TRAFFIC_AWARE"]
-    q1_pass = bool(traffic_aware) and all(r.ok for r in traffic_aware)
+def evaluate_verdicts(results: list[RouteResult]) -> dict[str, bool]:
+    q1_pass = bool(results) and all(r.ok for r in results)
     successful = [r for r in results if r.ok]
     # Vacuously-true is misleading here: with zero successful calls there's
     # nothing to check the field mask against, so that's a FAIL, not a PASS.
@@ -221,26 +223,29 @@ def evaluate_verdicts(results: list[RouteCallResult]) -> dict[str, bool]:
 
 
 def print_report(
-    results: list[RouteCallResult], env_label: str, verdicts: dict[str, bool]
+    results: list[RouteResult], env_label: str, verdicts: dict[str, bool]
 ) -> None:
     n_calls = len(results)
     print(f"Budget: {n_calls} Google API calls this run\n")
 
     header = (
-        f"{'Route':<12} {'Call type':<16} {'Status':<8} "
-        f"{'Duration (min)':<15} {'Distance (km)':<14} {'Fields OK':<10} Error"
+        f"{'Route':<12} {'Status':<8} {'Traffic (min)':<14} "
+        f"{'No-traffic (min)':<17} {'Distance (km)':<14} {'Fields OK':<10} Error"
     )
     print(header)
     print("-" * len(header))
     for r in results:
         status = "OK" if r.ok else "FAIL"
         duration = f"{r.duration_min}" if r.duration_min is not None else "-"
+        static_duration = (
+            f"{r.static_duration_min}" if r.static_duration_min is not None else "-"
+        )
         distance = f"{r.distance_m / 1000:.1f}" if r.distance_m else "-"
         fields_ok = "yes" if r.ok and not r.missing_fields else "no"
         error = r.error or ""
         print(
-            f"{r.route_name:<12} {r.call_type:<16} {status:<8} "
-            f"{duration:<15} {distance:<14} {fields_ok:<10} {error}"
+            f"{r.route_name:<12} {status:<8} {duration:<14} "
+            f"{static_duration:<17} {distance:<14} {fields_ok:<10} {error}"
         )
 
     print()
@@ -275,20 +280,15 @@ def main() -> int:
     destination = config["destination"]
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
-    results: list[RouteCallResult] = []
+    results: list[RouteResult] = []
     for route in config["routes"]:
-        for call_type in CALL_TYPES:
-            body = build_request_body(origin, destination, route["via"], call_type)
-            results.append(run_one_call(api_key, route["name"], call_type, body))
-            time.sleep(0.2)  # be polite between calls
+        body = build_request_body(origin, destination, route["via"])
+        result = run_route_call(api_key, route["name"], body)
+        results.append(result)
+        time.sleep(0.2)  # be polite between calls
 
-        traffic_result = next(
-            r
-            for r in results
-            if r.route_name == route["name"] and r.call_type == "TRAFFIC_AWARE"
-        )
-        if traffic_result.ok and traffic_result.polyline:
-            write_geojson(route["name"], traffic_result.polyline, timestamp)
+        if result.ok and result.polyline:
+            write_geojson(route["name"], result.polyline, timestamp)
 
     verdicts = evaluate_verdicts(results)
     print_report(results, args.env_label, verdicts)
@@ -301,9 +301,9 @@ def main() -> int:
             "results": [
                 {
                     "route": r.route_name,
-                    "call_type": r.call_type,
                     "ok": r.ok,
                     "duration_min": r.duration_min,
+                    "static_duration_min": r.static_duration_min,
                     "distance_m": r.distance_m,
                     "error": r.error,
                 }

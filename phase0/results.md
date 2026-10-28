@@ -33,13 +33,22 @@ For each route, does the returned path visibly follow the intended roads?
 
 ## Q3 — ETA sanity
 
-Do ETAs differ sensibly between routes and between times of day?
+Do ETAs differ sensibly between routes and between times of day? Each run
+logs both the traffic-aware duration and Google's traffic-free
+`staticDuration` baseline for the same request, so the gap between them is a
+built-in sanity check even on a single run.
 
-| Run (time of day) | City (min) | Mordor (min) | Toll Road (min) | Notes |
+| Run (time of day) | Route | Traffic-aware (min) | No-traffic baseline (min) | Notes |
 |---|---|---|---|---|
-| AM rush | | | | |
-| Midday | | | | |
-| PM rush | | | | |
+| AM rush | City | | | |
+| AM rush | Mordor | | | |
+| AM rush | Toll Road | | | |
+| Midday | City | | | |
+| Midday | Mordor | | | |
+| Midday | Toll Road | | | |
+| PM rush | City | | | |
+| PM rush | Mordor | | | |
+| PM rush | Toll Road | | | |
 
 Owner's judgment (acceptable / not acceptable):
 

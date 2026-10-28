@@ -44,8 +44,10 @@ coordinates later if you want (see step 9 below).
    ```
    uv run validate_api.py --env-label laptop
    ```
-   This makes 6 Google API calls (3 routes × traffic-aware + non-traffic
-   baseline), prints a pass/fail table, writes one `.geojson` per route to
+   This makes 3 Google API calls (one traffic-aware `computeRoutes` call per
+   route — each response includes both the traffic-aware `duration` and the
+   traffic-free `staticDuration` baseline, so no separate non-traffic request
+   is needed), prints a pass/fail table, writes one `.geojson` per route to
    `logs/`, and appends a line to `logs/validate_api_log.jsonl`.
 
    To test from the Raspberry Pi: get the repo there (`git clone`/`pull`),
@@ -82,6 +84,6 @@ exit criterion in `prd.md` section 6.
 
 ## Call budget
 
-6 calls per run (3 routes × 2 request types). A full Phase 0 campaign of a
-few runs on each machine across a day (6 × 2 machines × 3 times of day ≈ 36
-calls) stays trivially inside any Compute Routes free tier.
+3 calls per run (one per route). A full Phase 0 campaign of a few runs on
+each machine across a day (3 × 2 machines × 3 times of day ≈ 18 calls) stays
+trivially inside any Compute Routes free tier.
