@@ -1,16 +1,15 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-VALID_BODY = {
-    "timezone": "America/Mexico_City",
-    "schedule": {"weekdays": ["mon", "tue", "wed", "thu", "fri"], "time": "18:30"},
-    "origin": {"label": "Work", "lat": 19.4284, "lng": -99.1677},
-    "destination": {"label": "Home", "lat": 19.5095, "lng": -99.2383},
-    "routes": [{"name": "City", "color": "#2563eb", "via": []}],
-}
+from app.settings import REPO_ROOT
+
+# The one config fixture api/ and web/ tests both load (prd.md §11), so the
+# live API's accepted shape can't silently diverge from what web/ expects.
+VALID_BODY = json.loads((REPO_ROOT / "fixtures" / "sample-config.json").read_text())
 
 
 def test_get_config_returns_defaults_when_no_file(

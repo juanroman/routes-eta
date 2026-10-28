@@ -35,6 +35,16 @@ describe('getConfig', () => {
       expect.objectContaining({ headers: { 'Content-Type': 'application/json' } }),
     )
   })
+
+  it('throws ApiError when the response fails config-schema validation', async () => {
+    mockFetchOnce(200, {
+      ...EMPTY_CONFIG,
+      schedule: { weekdays: ['mon'], time: 'noon' },
+    })
+
+    await expect(getConfig()).rejects.toThrow(ApiError)
+    await expect(getConfig()).rejects.toThrow(/schema validation/)
+  })
 })
 
 describe('saveConfig', () => {

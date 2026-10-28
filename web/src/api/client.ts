@@ -1,3 +1,4 @@
+import { validateConfig } from './configSchema'
 import type { Config, PreviewRequest, PreviewResponse, RunNowResponse } from './types'
 
 export class ApiError extends Error {}
@@ -22,8 +23,15 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export function getConfig(): Promise<Config> {
-  return request<Config>('/config')
+export async function getConfig(): Promise<Config> {
+  const raw = await request<unknown>('/config')
+  try {
+    return validateConfig(raw)
+  } catch (err) {
+    throw new ApiError(
+      err instanceof Error ? err.message : 'Invalid config from the API',
+    )
+  }
 }
 
 export function saveConfig(config: Config): Promise<Config> {

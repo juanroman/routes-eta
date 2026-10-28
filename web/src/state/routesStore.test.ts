@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import {
   addRoute,
@@ -12,18 +14,13 @@ import {
   removeViaPoint,
   renameRoute,
 } from './routesStore'
-import type { Config } from '../api/types'
+import { validateConfig } from '../api/configSchema'
 
-const SAMPLE_CONFIG: Config = {
-  timezone: 'America/Mexico_City',
-  schedule: { weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'], time: '18:30' },
-  origin: { label: 'Work', lat: 19.4284, lng: -99.1677 },
-  destination: { label: 'Home', lat: 19.5095, lng: -99.2383 },
-  routes: [
-    { name: 'City', color: '#2563eb', via: [{ lat: 19.455, lng: -99.205 }] },
-    { name: 'Mordor', color: '#dc2626', via: [] },
-  ],
-}
+// Shared with api/'s tests (prd.md §11) — see fixtures/sample-config.json.
+// process.cwd() is reliably web/ here; see configSchema.test.ts for why
+// this doesn't use import.meta.url.
+const FIXTURE_PATH = resolve(process.cwd(), '..', 'fixtures', 'sample-config.json')
+const SAMPLE_CONFIG = validateConfig(JSON.parse(readFileSync(FIXTURE_PATH, 'utf-8')))
 
 describe('addRoute', () => {
   it('appends a route with a default name and an unused color', () => {

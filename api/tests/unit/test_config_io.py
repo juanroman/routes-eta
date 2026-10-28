@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import pytest
 
 from app.config import ConfigError, load_config, save_config
-from app.config_models import Config, NamedPoint, RouteDef
+from app.config_models import Config
+from app.settings import REPO_ROOT
+
+SAMPLE_CONFIG_PATH = REPO_ROOT / "fixtures" / "sample-config.json"
 
 
 def test_load_config_missing_file_returns_defaults(isolated_config_path: Path) -> None:
@@ -14,11 +18,7 @@ def test_load_config_missing_file_returns_defaults(isolated_config_path: Path) -
 
 
 def test_save_then_load_round_trips(isolated_config_path: Path) -> None:
-    config = Config(
-        origin=NamedPoint(label="Work", lat=19.4284, lng=-99.1677),
-        destination=NamedPoint(label="Home", lat=19.5095, lng=-99.2383),
-        routes=[RouteDef(name="City", color="#2563eb", via=[])],
-    )
+    config = Config.model_validate(json.loads(SAMPLE_CONFIG_PATH.read_text()))
 
     save_config(config)
     assert isolated_config_path.exists()
