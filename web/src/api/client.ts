@@ -1,4 +1,4 @@
-import type { Config, PreviewRequest, PreviewResponse } from './types'
+import type { Config, PreviewRequest, PreviewResponse, RunNowResponse } from './types'
 
 export class ApiError extends Error {}
 
@@ -38,4 +38,8 @@ export function previewRoute(req: PreviewRequest): Promise<PreviewResponse> {
     method: 'POST',
     body: JSON.stringify(req),
   })
+}
+
+export function runNow(): Promise<RunNowResponse> {
+  return request<RunNowResponse>('/run-now', { method: 'POST' })
 }

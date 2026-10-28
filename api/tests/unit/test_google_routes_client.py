@@ -7,7 +7,11 @@ import pytest
 import requests
 
 from app.config_models import LatLng
-from app.google_routes_client import GoogleRoutesError, fetch_route_preview
+from app.google_routes_client import (
+    GoogleRoutesError,
+    fetch_route_duration,
+    fetch_route_preview,
+)
 from app.settings import MissingApiKeyError
 
 ORIGIN = LatLng(lat=19.4284, lng=-99.1677)
@@ -76,3 +80,68 @@ def test_fetch_route_preview_network_error(mock_post: Any, _mock_key: Any) -> No
 def test_fetch_route_preview_missing_key(_mock_key: Any) -> None:
     with pytest.raises(GoogleRoutesError, match="no key"):
         fetch_route_preview(ORIGIN, DESTINATION, VIA)
+
+
+@patch("app.google_routes_client.get_google_api_key", return_value="test-key")
+@patch("app.google_routes_client.requests.post")
+def test_fetch_route_duration_happy_path(
+    mock_post: Any, _mock_key: Any, compute_routes_duration_response: dict[str, Any]
+) -> None:
+    mock_post.return_value = _fake_response(200, compute_routes_duration_response)
+
+    result = fetch_route_duration(ORIGIN, DESTINATION, VIA)
+
+    assert result.duration_s == 1234
+    sent_body = mock_post.call_args.kwargs["json"]
+    assert sent_body["routingPreference"] == "TRAFFIC_AWARE"
+    sent_headers = mock_post.call_args.kwargs["headers"]
+    assert sent_headers["X-Goog-FieldMask"] == "routes.duration"
+
+
+@patch("app.google_routes_client.get_google_api_key", return_value="test-key")
+@patch("app.google_routes_client.requests.post")
+def test_fetch_route_duration_non_200(mock_post: Any, _mock_key: Any) -> None:
+    mock_post.return_value = _fake_response(403, text="permission denied")
+
+    with pytest.raises(GoogleRoutesError, match="403"):
+        fetch_route_duration(ORIGIN, DESTINATION, VIA)
+
+
+@patch("app.google_routes_client.get_google_api_key", return_value="test-key")
+@patch("app.google_routes_client.requests.post")
+def test_fetch_route_duration_missing_duration_field(
+    mock_post: Any, _mock_key: Any
+) -> None:
+    mock_post.return_value = _fake_response(200, {"routes": [{}]})
+
+    with pytest.raises(GoogleRoutesError, match="unexpected response shape"):
+        fetch_route_duration(ORIGIN, DESTINATION, VIA)
+
+
+@patch("app.google_routes_client.get_google_api_key", return_value="test-key")
+@patch("app.google_routes_client.requests.post")
+def test_fetch_route_duration_non_numeric_duration(
+    mock_post: Any, _mock_key: Any
+) -> None:
+    mock_post.return_value = _fake_response(200, {"routes": [{"duration": "oops"}]})
+
+    with pytest.raises(GoogleRoutesError, match="unexpected duration value"):
+        fetch_route_duration(ORIGIN, DESTINATION, VIA)
+
+
+@patch("app.google_routes_client.get_google_api_key", return_value="test-key")
+@patch("app.google_routes_client.requests.post")
+def test_fetch_route_duration_network_error(mock_post: Any, _mock_key: Any) -> None:
+    mock_post.side_effect = requests.ConnectionError("no route to host")
+
+    with pytest.raises(GoogleRoutesError, match="could not reach"):
+        fetch_route_duration(ORIGIN, DESTINATION, VIA)
+
+
+@patch(
+    "app.google_routes_client.get_google_api_key",
+    side_effect=MissingApiKeyError("no key"),
+)
+def test_fetch_route_duration_missing_key(_mock_key: Any) -> None:
+    with pytest.raises(GoogleRoutesError, match="no key"):
+        fetch_route_duration(ORIGIN, DESTINATION, VIA)

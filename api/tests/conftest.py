@@ -18,6 +18,13 @@ def compute_routes_response() -> dict[str, Any]:
 
 
 @pytest.fixture
+def compute_routes_duration_response() -> dict[str, Any]:
+    return json.loads(
+        (FIXTURES_DIR / "compute_routes_duration_response.json").read_text()
+    )
+
+
+@pytest.fixture
 def client() -> TestClient:
     return TestClient(app)
 

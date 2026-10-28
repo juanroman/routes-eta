@@ -7,5 +7,6 @@ phase0/logs/*
 !phase0/logs/.gitkeep
 .DS_Store
 api/config.yaml
+api/checker.log
 node_modules/
 web/dist/

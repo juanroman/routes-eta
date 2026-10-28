@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { ApiError, getConfig, previewRoute, saveConfig } from './client'
+import { ApiError, getConfig, previewRoute, runNow, saveConfig } from './client'
 import type { Config, PreviewRequest } from './types'
 
 const EMPTY_CONFIG: Config = {
@@ -72,5 +72,28 @@ describe('previewRoute', () => {
   it('falls back to a generic message when the error body has no detail', async () => {
     mockFetchOnce(500, {})
     await expect(previewRoute(request)).rejects.toThrow('failed with status 500')
+  })
+})
+
+describe('runNow', () => {
+  it('POSTs to /api/run-now and returns the result', async () => {
+    mockFetchOnce(200, {
+      message: 'City 56',
+      results: [{ name: 'City', minutes: 56, error: null }],
+    })
+
+    const result = await runNow()
+
+    expect(result.message).toBe('City 56')
+    expect(fetch).toHaveBeenCalledWith(
+      '/api/run-now',
+      expect.objectContaining({ method: 'POST' }),
+    )
+  })
+
+  it('throws ApiError with the detail message on a non-2xx response', async () => {
+    mockFetchOnce(400, { detail: 'no routes are configured' })
+    await expect(runNow()).rejects.toThrow(ApiError)
+    await expect(runNow()).rejects.toThrow('no routes are configured')
   })
 })

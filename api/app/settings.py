@@ -39,3 +39,21 @@ def get_google_api_key() -> str:
             "repo root and fill in a real key."
         )
     return key
+
+
+class MissingPushoverCredentialsError(RuntimeError):
+    """Raised when PUSHOVER_APP_TOKEN/PUSHOVER_USER_KEY aren't set. Same
+    request-time-not-startup-time reasoning as MissingApiKeyError."""
+
+
+def get_pushover_credentials() -> tuple[str, str]:
+    """Read the Pushover app token and user key from the repo-root .env."""
+    load_dotenv(REPO_ROOT / ".env")
+    token = os.environ.get("PUSHOVER_APP_TOKEN")
+    user_key = os.environ.get("PUSHOVER_USER_KEY")
+    if not token or not user_key:
+        raise MissingPushoverCredentialsError(
+            "PUSHOVER_APP_TOKEN and PUSHOVER_USER_KEY must be set. Copy "
+            ".env.example to .env at the repo root and fill them in."
+        )
+    return token, user_key

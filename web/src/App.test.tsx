@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
 import * as apiClient from './api/client'
@@ -37,6 +37,37 @@ describe('App', () => {
 
     expect(
       await screen.findByText('Could not load the config from the API.'),
+    ).toBeInTheDocument()
+  })
+
+  it('sends the ETAs now and shows the returned message', async () => {
+    vi.spyOn(apiClient, 'getConfig').mockResolvedValue(EMPTY_CONFIG)
+    vi.spyOn(apiClient, 'runNow').mockResolvedValue({
+      message: 'City 56 · Mordor ?',
+      results: [],
+    })
+
+    render(<App />)
+    await screen.findByTestId('map-view-stub')
+
+    fireEvent.click(screen.getByText('Send ETAs now'))
+
+    expect(await screen.findByText('Sent: City 56 · Mordor ?')).toBeInTheDocument()
+  })
+
+  it('shows an error when sending the ETAs fails', async () => {
+    vi.spyOn(apiClient, 'getConfig').mockResolvedValue(EMPTY_CONFIG)
+    vi.spyOn(apiClient, 'runNow').mockRejectedValue(
+      new apiClient.ApiError('no routes are configured'),
+    )
+
+    render(<App />)
+    await screen.findByTestId('map-view-stub')
+
+    fireEvent.click(screen.getByText('Send ETAs now'))
+
+    expect(
+      await screen.findByText('Could not send ETAs: no routes are configured'),
     ).toBeInTheDocument()
   })
 })

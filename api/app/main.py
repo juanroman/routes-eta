@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import config_routes, preview
+from app.routers import config_routes, preview, run_now
 from app.settings import WEB_ORIGIN
 
 
@@ -17,6 +17,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(preview.router)
     app.include_router(config_routes.router)
+    app.include_router(run_now.router)
     return app
 
 

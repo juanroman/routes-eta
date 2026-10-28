@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ApiError, getConfig, saveConfig } from './api/client'
+import { ApiError, getConfig, runNow, saveConfig } from './api/client'
 import type { Config, LatLng } from './api/types'
 import { MapView } from './map/MapView'
 import { RoutePanel } from './routes-panel/RoutePanel'
@@ -26,6 +26,7 @@ import type { BuilderState } from './state/types'
 
 type LoadStatus = 'loading' | 'ready' | 'error'
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
+type RunStatus = 'idle' | 'running' | 'done' | 'error'
 
 function App() {
   const [state, setState] = useState<BuilderState>(initialState())
@@ -33,6 +34,8 @@ function App() {
   const [loadStatus, setLoadStatus] = useState<LoadStatus>('loading')
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const [saveError, setSaveError] = useState<string | null>(null)
+  const [runStatus, setRunStatus] = useState<RunStatus>('idle')
+  const [runMessage, setRunMessage] = useState<string | null>(null)
 
   useEffect(() => {
     getConfig()
@@ -63,6 +66,19 @@ function App() {
     } catch (err) {
       setSaveStatus('error')
       setSaveError(err instanceof ApiError ? err.message : 'Save failed')
+    }
+  }
+
+  async function handleRunNow() {
+    setRunStatus('running')
+    setRunMessage(null)
+    try {
+      const result = await runNow()
+      setRunStatus('done')
+      setRunMessage(result.message)
+    } catch (err) {
+      setRunStatus('error')
+      setRunMessage(err instanceof ApiError ? err.message : 'Could not send ETAs')
     }
   }
 
@@ -132,6 +148,16 @@ function App() {
         </button>
         {saveStatus === 'saved' && <p>Saved.</p>}
         {saveStatus === 'error' && <p>Could not save: {saveError}</p>}
+
+        <button
+          type="button"
+          onClick={() => void handleRunNow()}
+          disabled={runStatus === 'running'}
+        >
+          Send ETAs now
+        </button>
+        {runStatus === 'done' && <p>Sent: {runMessage}</p>}
+        {runStatus === 'error' && <p>Could not send ETAs: {runMessage}</p>}
       </div>
     </div>
   )

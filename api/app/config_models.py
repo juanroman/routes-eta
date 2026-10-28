@@ -23,10 +23,8 @@ class LatLng(BaseModel):
     lng: float = Field(ge=-180, le=180)
 
 
-class NamedPoint(BaseModel):
+class NamedPoint(LatLng):
     label: str
-    lat: float = Field(ge=-90, le=90)
-    lng: float = Field(ge=-180, le=180)
 
 
 class RouteDef(BaseModel):

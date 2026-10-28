@@ -42,3 +42,14 @@ export interface PreviewResponse {
   distance_meters: number
   polyline: [number, number][]
 }
+
+export interface RouteResult {
+  name: string
+  minutes: number | null
+  error: string | null
+}
+
+export interface RunNowResponse {
+  message: string
+  results: RouteResult[]
+}

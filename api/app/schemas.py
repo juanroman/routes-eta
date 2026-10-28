@@ -20,3 +20,14 @@ class PreviewResponse(BaseModel):
 
 class ErrorResponse(BaseModel):
     detail: str
+
+
+class RouteResultSchema(BaseModel):
+    name: str
+    minutes: int | None
+    error: str | None = None
+
+
+class RunNowResponse(BaseModel):
+    message: str
+    results: list[RouteResultSchema]
