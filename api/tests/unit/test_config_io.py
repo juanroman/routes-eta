@@ -33,7 +33,7 @@ def test_load_config_corrupt_yaml_raises(isolated_config_path: Path) -> None:
 
 
 def test_load_config_schema_mismatch_raises(isolated_config_path: Path) -> None:
-    isolated_config_path.write_text("origin: not-an-object\n", encoding="utf-8")
+    isolated_config_path.write_text("commutes: not-a-list\n", encoding="utf-8")
 
     with pytest.raises(ConfigError):
         load_config()

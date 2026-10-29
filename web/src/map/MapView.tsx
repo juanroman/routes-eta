@@ -1,6 +1,6 @@
 import { MapContainer, TileLayer, useMapEvents } from 'react-leaflet'
-import type { LatLng } from '../api/types'
-import type { BuilderState } from '../state/types'
+import type { LatLng, NamedPoint } from '../api/types'
+import type { RouteUI } from '../state/types'
 import { OriginDestinationMarkers } from './OriginDestinationMarkers'
 import { RouteCasing } from './RouteCasing'
 import { RouteLayer } from './RouteLayer'
@@ -10,8 +10,16 @@ import { offsetForIndex } from './routeOffset'
 const DEFAULT_CENTER: LatLng = { lat: 19.4326, lng: -99.1332 }
 const DEFAULT_ZOOM = 12
 
+// The selected commute's editable slice — MapView never needs the full
+// commute list or which one is selected, just what it's currently drawing.
+export interface MapViewState {
+  origin: NamedPoint | null
+  destination: NamedPoint | null
+  routes: RouteUI[]
+}
+
 interface Props {
-  state: BuilderState
+  state: MapViewState
   onMapClick: (point: LatLng) => void
   onAddViaPoint: (routeId: string, point: LatLng, insertAt: number) => void
   onMoveViaPoint: (routeId: string, index: number, point: LatLng) => void

@@ -16,19 +16,24 @@ class PushoverError(Exception):
     """Raised when the Pushover notification could not be sent."""
 
 
-def format_message(results: list[RouteCheckResult]) -> str:
+def format_message(results: list[RouteCheckResult], label: str | None = None) -> str:
     """FR-16/17: "Name minutes" per route, " · "-joined, "Name ?" on failure.
 
     FR-18: if every route failed, a short failure message instead. Callers
     are expected to have already rejected an empty `results` list (an empty
-    config, not an all-failed run) via checker.check_all_routes.
+    commute, not an all-failed run) via checker.check_commute.
+
+    `label` (a commute's name) is prefixed to the message when given, so a
+    notification is identifiable when more than one commute is configured.
     """
     if all(r.minutes is None for r in results):
-        return FAILURE_MESSAGE
-    return " · ".join(
-        f"{r.name} {r.minutes}" if r.minutes is not None else f"{r.name} ?"
-        for r in results
-    )
+        body = FAILURE_MESSAGE
+    else:
+        body = " · ".join(
+            f"{r.name} {r.minutes}" if r.minutes is not None else f"{r.name} ?"
+            for r in results
+        )
+    return f"{label}: {body}" if label else body
 
 
 def send_notification(message: str) -> None:

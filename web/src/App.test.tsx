@@ -8,19 +8,29 @@ vi.mock('./map/MapView', () => ({
   MapView: () => <div data-testid="map-view-stub" />,
 }))
 
+const CONFIG_WITH_ONE_COMMUTE: Config = {
+  timezone: 'America/Mexico_City',
+  commutes: [
+    {
+      name: 'Work to Home',
+      origin: null,
+      destination: null,
+      routes: [],
+      schedules: [],
+    },
+  ],
+}
+
 const EMPTY_CONFIG: Config = {
   timezone: 'America/Mexico_City',
-  schedule: { weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'], time: '18:30' },
-  origin: null,
-  destination: null,
-  routes: [],
+  commutes: [],
 }
 
 describe('App', () => {
   it('loads the config on mount and renders an empty route list', async () => {
     const getConfigSpy = vi
       .spyOn(apiClient, 'getConfig')
-      .mockResolvedValue(EMPTY_CONFIG)
+      .mockResolvedValue(CONFIG_WITH_ONE_COMMUTE)
 
     render(<App />)
 
@@ -40,10 +50,21 @@ describe('App', () => {
     ).toBeInTheDocument()
   })
 
-  it('sends the ETAs now and shows a chip per route', async () => {
+  it('prompts to create a commute when none exist yet', async () => {
     vi.spyOn(apiClient, 'getConfig').mockResolvedValue(EMPTY_CONFIG)
-    vi.spyOn(apiClient, 'runNow').mockResolvedValue({
-      message: 'City 56 · Mordor ?',
+
+    render(<App />)
+    await screen.findByTestId('map-view-stub')
+
+    expect(screen.getByText('Create a commute to get started.')).toBeInTheDocument()
+    expect(screen.getByText('Send ETAs now')).toBeDisabled()
+  })
+
+  it('sends the ETAs now for the selected commute and shows a chip per route', async () => {
+    vi.spyOn(apiClient, 'getConfig').mockResolvedValue(CONFIG_WITH_ONE_COMMUTE)
+    const runNowSpy = vi.spyOn(apiClient, 'runNow').mockResolvedValue({
+      commute: 'Work to Home',
+      message: 'Work to Home: City 56 · Mordor ?',
       results: [
         { name: 'City', minutes: 56, error: null },
         { name: 'Mordor', minutes: null, error: 'timeout' },
@@ -59,10 +80,11 @@ describe('App', () => {
     expect(await screen.findByText('56 min')).toBeInTheDocument()
     expect(await screen.findByText('Mordor')).toBeInTheDocument()
     expect(await screen.findByText('?')).toBeInTheDocument()
+    expect(runNowSpy).toHaveBeenCalledWith('Work to Home')
   })
 
   it('shows an error when sending the ETAs fails', async () => {
-    vi.spyOn(apiClient, 'getConfig').mockResolvedValue(EMPTY_CONFIG)
+    vi.spyOn(apiClient, 'getConfig').mockResolvedValue(CONFIG_WITH_ONE_COMMUTE)
     vi.spyOn(apiClient, 'runNow').mockRejectedValue(
       new apiClient.ApiError('no routes are configured'),
     )

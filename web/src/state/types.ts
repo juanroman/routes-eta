@@ -1,4 +1,4 @@
-import type { LatLng, NamedPoint, RouteDef } from '../api/types'
+import type { LatLng, NamedPoint, RouteDef, ScheduleRule } from '../api/types'
 
 export type PreviewStatus = 'idle' | 'loading' | 'error'
 
@@ -12,9 +12,17 @@ export interface RouteUI extends RouteDef {
 
 export type Mode = 'idle' | 'settingOrigin' | 'settingDestination'
 
-export interface BuilderState {
+export interface CommuteUI {
+  id: string
+  name: string
   origin: NamedPoint | null
   destination: NamedPoint | null
   routes: RouteUI[]
+  schedules: ScheduleRule[]
+}
+
+export interface BuilderState {
+  commutes: CommuteUI[]
+  selectedCommuteId: string | null
   mode: Mode
 }

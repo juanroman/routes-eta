@@ -44,6 +44,21 @@ def test_format_message_all_failed_is_short_failure_message() -> None:
     assert format_message(results) == FAILURE_MESSAGE
 
 
+def test_format_message_with_label_prefixes_the_commute_name() -> None:
+    results = [RouteCheckResult(name="City", minutes=56)]
+
+    assert format_message(results, label="Work to Home") == "Work to Home: City 56"
+
+
+def test_format_message_with_label_prefixes_the_failure_message_too() -> None:
+    results = [RouteCheckResult(name="City", minutes=None, error="boom")]
+
+    assert (
+        format_message(results, label="Work to Home")
+        == f"Work to Home: {FAILURE_MESSAGE}"
+    )
+
+
 def _fake_response(status_code: int, text: str = "") -> Any:
     class FakeResponse:
         def __init__(self) -> None:

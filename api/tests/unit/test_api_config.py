@@ -18,7 +18,7 @@ def test_get_config_returns_defaults_when_no_file(
     response = client.get("/config")
 
     assert response.status_code == 200
-    assert response.json()["routes"] == []
+    assert response.json()["commutes"] == []
 
 
 def test_put_then_get_config_round_trips(
@@ -29,13 +29,16 @@ def test_put_then_get_config_round_trips(
     assert isolated_config_path.exists()
 
     get_response = client.get("/config")
-    assert get_response.json()["routes"][0]["name"] == "City"
+    assert get_response.json()["commutes"][0]["routes"][0]["name"] == "City"
 
 
 def test_put_config_rejects_invalid_body_without_writing(
     client: TestClient, isolated_config_path: Path
 ) -> None:
-    response = client.put("/config", json={"routes": [{"name": "City"}]})
+    response = client.put(
+        "/config",
+        json={"commutes": [{"name": "Work to Home", "routes": [{"name": "City"}]}]},
+    )
 
     assert response.status_code == 422
     assert not isolated_config_path.exists()

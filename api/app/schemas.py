@@ -28,6 +28,11 @@ class RouteResultSchema(BaseModel):
     error: str | None = None
 
 
+class RunNowRequest(BaseModel):
+    commute: str
+
+
 class RunNowResponse(BaseModel):
+    commute: str
     message: str
     results: list[RouteResultSchema]
