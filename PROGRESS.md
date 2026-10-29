@@ -3,14 +3,78 @@
 Tracks where Phase 1 actually is, across sessions. See `prd.md` for the
 requirements this implements. Phase 0 is done (`phase0/results.md`).
 
+## Status: Phase 1 — functionally built, not signed off
+
+Re-evaluated against prd.md §12's actual exit criteria. Verdict: **not
+done**. Everything is built and working against the real Google and
+Pushover APIs on a laptop; the one remaining blocker is that nothing has
+ever run unattended on the Raspberry Pi.
+
+| # | Success criterion (prd.md §12) | Status |
+|---|---|---|
+| 1 | Set up 3 routes in builder in <10 min | Likely met, never formally timed |
+| 2 | Notification arrives automatically at the scheduled time, no manual step | **Not met** — only ever triggered manually; no cron job has actually been installed anywhere |
+| 3 | Changing schedule time needs only the config file + one documented command | Built and documented (`uv run python -m app.cli crontab` + the install one-liner in `api/README.md`), never actually exercised |
+| 4 | Failure notification sent instead of silence when Google is unreachable | Met — unit- and integration-tested (`pushover.format_message`'s all-failed path, `checker.check_all_routes`'s per-route independence) |
+| 5 | Top-level check passes for both projects, **and the integration suite passes on both the laptop and the Raspberry Pi** | Half met — laptop: yes, repeatedly; **Raspberry Pi: never tested**, nothing has run on physical Pi hardware |
+| 6 | Owner finds it useful enough to keep running for a week | Can't be assessed yet — built today |
+
+**The real blocker is a single thing: deploy to the Pi, install the cron
+job, and confirm one real unattended scheduled run.** That alone closes
+criteria 2 and 5. See `api/README.md`'s "Checker, notification and
+scheduling" section for the exact steps.
+
+Two smaller gaps from prd.md, independent of the Pi, are also still open:
+- **FR-9** (via points snapped to the nearest road) — not implemented at
+  all; the PRD marks it "best-effort," but right now it's silently absent
+  rather than a documented decision.
+- **prd.md §11's "Web-to-API check"** — built for `/run-now`
+  (`api/tests/integration/test_run_now_api.py`), but the PRD specifically
+  asks for this on `/preview` and save/read `/config` too, which was never
+  added.
+
+### What's been done since slice 2 (this session)
+
+- **Closed out Phase 0's paperwork.** `phase0/results.md` was a blank
+  template despite PROGRESS.md previously calling Phase 0 "done." Filled it
+  in with real evidence: Q1/Q6 yes, Q5 yes on laptop (Pi still blank — the
+  same gap called out above), Q3 has two real data points including a
+  notable rush-hour ETA jump. Generated fresh `.geojson` for the real
+  commute routes (gitignored) so Q2's plausibility check is against the
+  owner's actual roads. Q4 (billing tier) and the Pi side of Q5 are
+  explicitly left for the owner — no GCP console access or Pi hardware from
+  here.
+- **Shared config-schema validation (prd.md §11).** New `fixtures/sample-
+  config.json` at the repo root, loaded by both projects' tests (previously
+  each hand-rolled its own sample config, so they could silently drift).
+  `web/` gained `validateConfig()` — a hand-rolled runtime validator (no new
+  dependency, matching this project's existing precedent of avoiding new
+  deps — see "Route reordering is up/down buttons" below) wired into
+  `getConfig()`, so a malformed `/config` response now fails clearly
+  instead of silently producing broken UI state.
+- **ETA display polish.** The "Send ETAs now" result was a raw Pushover-
+  style string (`Sent: Constituyentes 73 · Puentes 74 · Mordor 75`) dumped
+  at default `<p>` size, wrapping awkwardly. Replaced with colored chips
+  (route color + name + bold minutes, `?` for a failed route) built from the
+  structured `results` array `/run-now` already returns.
+- **Verified the real traffic data isn't a bug.** Three routes briefly
+  showed suspiciously similar ETAs (74–78 min) despite very different
+  distances (12–23.5 km). Re-fetched with the full field mask and confirmed
+  each via point lands within 20–70m of the actual returned path, and the
+  no-traffic baselines differ sensibly (27/33/37 min) — the convergence was
+  real evening-rush congestion hitting all three roads hard and roughly
+  uniformly (2.1–2.8× their free-flow time), not a request bug.
+- **Published to GitHub.** `main` fast-forwarded to include everything
+  (Phase 0 + Phase 1 slices 1–2 + the work above), rebased onto the repo's
+  initial MIT `LICENSE` commit, pushed to
+  `https://github.com/juanroman/routes-eta`. Added a root `README.md` (badge
+  + orientation; intentionally minimal, more to come).
+
 ## Status: Phase 1, slice 2 — done
 
 Slice 2 = checker + Pushover notification + scheduler + the `/run-now`
 endpoint and builder button (FR-11..22, FR-26). Slice 1 (route builder +
 minimal backend) was already done; see below.
-
-Branch: `feature/phase-1-route-builder`, no remote configured for this repo
-yet.
 
 ### What's built (slice 2)
 
@@ -44,11 +108,9 @@ yet.
   button). `./check.sh` green across both projects.
 - Manually verified against the real Google API and the owner's real
   `config.yaml`: clicked "Send ETAs now" in the builder, got a real
-  traffic-aware ETA for all three routes, and a clear `Could not send ETAs:
-  PUSHOVER_APP_TOKEN and PUSHOVER_USER_KEY must be set...` error — correct,
-  since Pushover credentials aren't in `.env` yet. **Not yet verified: an
-  actual Pushover push arriving on a phone** — needs the owner to add
-  `PUSHOVER_APP_TOKEN`/`PUSHOVER_USER_KEY` to `.env` first.
+  traffic-aware ETA for all three routes, and (once `PUSHOVER_APP_TOKEN`/
+  `PUSHOVER_USER_KEY` were added to `.env`) a real Pushover push confirmed
+  received on the owner's phone.
 
 ### Decisions made beyond/clarifying the PRD (slice 2)
 
@@ -125,21 +187,27 @@ Slice 1 = route builder (`web/`) + the minimal backend (`api/`) it needs.
   with the pixel-offset approach described above, which only affects
   rendering — saved via-point coordinates are untouched.
 
-### Repo hygiene fix (session start)
+### Repo hygiene fix
 
 Phase 0's work existed only on `feature/phase-0-api-validation`, never merged
 to `main`. Fixed by fast-forwarding `main` onto it, then branching Phase 1
-from the updated `main`.
+from the updated `main`. Both feature branches were later fast-forward-
+merged back into `main` and pushed to GitHub (see "What's been done since
+slice 2" above) — `main` is now the only branch that matters.
 
-### Not built yet
+## Not built yet / open
 
-- Known minor polish item, not yet fixed: a console a11y warning about form
-  fields missing `id`/`name` attributes in `web/`.
-- Pushover credentials aren't in `.env` yet, so an actual push to a phone has
-  never been sent — only the real Google API calls and the clear failure
-  path have been verified (see slice 2's "What's built" above).
+- **Raspberry Pi deployment** — the one real blocker to calling Phase 1
+  done (success criteria 2 and 5). Nothing has run on physical Pi hardware.
+- **FR-9** (snap via points to nearest road) — not implemented.
+- **prd.md §11's "Web-to-API check"** for `/preview` and save/read
+  `/config` — only built for `/run-now` so far.
+- Known minor polish item: a console a11y warning about form fields missing
+  `id`/`name` attributes in `web/`.
+- Success criterion 1 (setup time) was never formally timed; criterion 6
+  (a week of real use) is inherently pending.
 
-### How to pick this back up
+## How to pick this back up
 
 ```
 cd api && uv run uvicorn app.main:app --reload   # backend
@@ -147,11 +215,15 @@ cd web && npm run dev                            # builder, separate shell
 ./check.sh                                       # both projects' full checks
 ```
 
-To finish verifying slice 2 for real: add `PUSHOVER_APP_TOKEN` and
-`PUSHOVER_USER_KEY` to `.env`, click "Send ETAs now" in the builder (or `cd
-api && uv run python -m app.cli run-now`), and confirm a push arrives. Then
-`uv run python -m app.cli crontab` and install it on whichever machine runs
-unattended (see `api/README.md`).
+Repo: `https://github.com/juanroman/routes-eta`, `main` branch, no other
+branches in active use.
+
+To actually close out Phase 1: deploy to the Pi (`git clone`, copy `.env` +
+`api/config.yaml` over since both are gitignored, `uv sync`, smoke-test with
+`uv run python -m app.cli run-now`, then generate and install the cron job
+with `uv run python -m app.cli crontab` — see `api/README.md`'s "Checker,
+notification and scheduling" section for the exact commands), and confirm
+one real unattended scheduled run arrives.
 
 This doc plus the code and tests in `api/` and `web/` is the full picture —
 no other plan file to track down.
