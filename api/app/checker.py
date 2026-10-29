@@ -6,12 +6,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.config_models import Config, NamedPoint, RouteDef
+from app.config_models import Commute, NamedPoint, RouteDef
 from app.google_routes_client import GoogleRoutesError, fetch_route_duration
 
 
 class CheckerError(Exception):
-    """Raised when the config isn't complete enough to run the checker."""
+    """Raised when a commute isn't configured completely enough to run."""
 
 
 @dataclass
@@ -32,12 +32,16 @@ def check_route(
     return RouteCheckResult(name=route.name, minutes=round(duration.duration_s / 60))
 
 
-def check_all_routes(config: Config) -> list[RouteCheckResult]:
-    if config.origin is None or config.destination is None:
-        raise CheckerError("origin and destination must be set before checking routes")
-    if not config.routes:
-        raise CheckerError("no routes are configured")
+def check_commute(commute: Commute) -> list[RouteCheckResult]:
+    if commute.origin is None or commute.destination is None:
+        raise CheckerError(
+            f"commute {commute.name!r}: origin and destination must be set "
+            "before checking routes"
+        )
+    if not commute.routes:
+        raise CheckerError(f"commute {commute.name!r}: no routes are configured")
 
     return [
-        check_route(config.origin, config.destination, route) for route in config.routes
+        check_route(commute.origin, commute.destination, route)
+        for route in commute.routes
     ]

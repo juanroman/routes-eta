@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from fastapi.testclient import TestClient
 
 from app.config import save_config
-from app.config_models import Config, LatLng, NamedPoint, RouteDef
+from app.config_models import Commute, Config, LatLng, NamedPoint, RouteDef
 from app.main import app
 from app.settings import REPO_ROOT
 
@@ -31,6 +31,7 @@ pytestmark = pytest.mark.integration
 ORIGIN = NamedPoint(label="Work", lat=19.4284, lng=-99.1677)
 DESTINATION = NamedPoint(label="Home", lat=19.5095, lng=-99.2383)
 VIA = [LatLng(lat=19.4550, lng=-99.2050)]
+COMMUTE_NAME = "Work to Home"
 
 
 @pytest.mark.skipif(
@@ -44,19 +45,25 @@ def test_run_now_endpoint_against_real_google_api(
     monkeypatch.setattr("app.settings.CONFIG_PATH", config_path)
     save_config(
         Config(
-            origin=ORIGIN,
-            destination=DESTINATION,
-            routes=[RouteDef(name="City", color="#2563eb", via=VIA)],
+            commutes=[
+                Commute(
+                    name=COMMUTE_NAME,
+                    origin=ORIGIN,
+                    destination=DESTINATION,
+                    routes=[RouteDef(name="City", color="#2563eb", via=VIA)],
+                )
+            ]
         ),
         path=config_path,
     )
 
     with patch("app.runner.send_notification") as mock_send:
-        response = TestClient(app).post("/run-now")
+        response = TestClient(app).post("/run-now", json={"commute": COMMUTE_NAME})
 
     assert response.status_code == 200
     body = response.json()
-    assert re.fullmatch(r"City \d+", body["message"])
+    assert body["commute"] == COMMUTE_NAME
+    assert re.fullmatch(rf"{re.escape(COMMUTE_NAME)}: City \d+", body["message"])
     [result] = body["results"]
     assert result["name"] == "City"
     assert result["minutes"] > 0

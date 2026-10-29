@@ -1,10 +1,27 @@
 {
   "timezone": "America/Mexico_City",
-  "schedule": { "weekdays": ["mon", "tue", "wed", "thu", "fri"], "time": "18:30" },
-  "origin": { "label": "Work", "lat": 19.4284, "lng": -99.1677 },
-  "destination": { "label": "Home", "lat": 19.5095, "lng": -99.2383 },
-  "routes": [
-    { "name": "City", "color": "#2563eb", "via": [{ "lat": 19.455, "lng": -99.205 }] },
-    { "name": "Mordor", "color": "#dc2626", "via": [] }
+  "commutes": [
+    {
+      "name": "Work to Home",
+      "origin": { "label": "Work", "lat": 19.4284, "lng": -99.1677 },
+      "destination": { "label": "Home", "lat": 19.5095, "lng": -99.2383 },
+      "routes": [
+        { "name": "City", "color": "#2563eb", "via": [{ "lat": 19.455, "lng": -99.205 }] },
+        { "name": "Mordor", "color": "#dc2626", "via": [] }
+      ],
+      "schedules": [{ "weekdays": ["mon", "tue", "wed", "thu", "fri"], "time": "18:30" }]
+    },
+    {
+      "name": "Home to Work",
+      "origin": { "label": "Home", "lat": 19.5095, "lng": -99.2383 },
+      "destination": { "label": "Work", "lat": 19.4284, "lng": -99.1677 },
+      "routes": [
+        { "name": "City", "color": "#2563eb", "via": [{ "lat": 19.455, "lng": -99.205 }] }
+      ],
+      "schedules": [
+        { "weekdays": ["mon"], "time": "06:30" },
+        { "weekdays": ["tue", "wed", "thu", "fri"], "time": "07:30" }
+      ]
+    }
   ]
 }

@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Draft v0.2 (split into `api/` Python project and `web/` React project, one repository) |
+| **Status** | Draft v0.3 (adds multiple named commutes, each with its own routes and schedule rules — see §7/§8) |
 | **Date** | 2026-10-28 |
 | **Owner** | Juan |
 | **Audience** | The builder (Claude Code session) and the owner |
@@ -31,6 +31,7 @@ Work is split into three phases:
 - The owner has three very different routes from work to home (for example: through the city via Constituyentes + Viaducto; a shortcut the owner calls "Mordor" via Vasco de Quiroga + Eje 6; and a toll road). A navigator that only says "Mordor is 5 minutes faster" is the wrong tool: Mordor is only worth it in an emergency, and the toll road is the smoothest ride even when it is slower.
 - The valuable thing is **empowering the driver with ETAs for chosen routes**, not recommending one.
 - Waze has no public API for live routing or alerts (see Appendix A), so the tool must use a different traffic-aware provider.
+- The owner's week isn't symmetric: the drive uses a different set of routes each direction (home→work vs. work→home), and even within one direction the departure time isn't constant (for example, Monday mornings leave earlier than Tuesday–Friday). A single origin/destination/schedule no longer describes the owner's actual commute.
 
 ### Known limitation, accepted for the POC
 
@@ -38,17 +39,17 @@ An ETA is a snapshot of traffic *now*. A route can degrade while the driver is o
 
 ## 3. Users and scenarios
 
-**User:** one person (the owner), with one commute. Designed so another user could configure their own routes.
+**User:** one person (the owner), with more than one commute (e.g. work→home each evening, home→work each morning). Designed so another user could configure their own commutes.
 
-**Primary scenario:** At a configured time on weekdays, the owner's phone buzzes with a notification listing each route and its ETA. At a glance the owner picks a route.
+**Primary scenario:** At each commute's scheduled time, the owner's phone buzzes with a notification — labeled with the commute's name — listing each of that commute's routes and its ETA. At a glance the owner picks a route. A commute's schedule can be more than one weekday+time rule (e.g. an earlier Monday departure, a later Tuesday–Friday one).
 
-**Secondary scenario:** On a laptop, the owner opens a local page, draws the routes once by dragging on a map, and saves them.
+**Secondary scenario:** On a laptop, the owner opens a local page, creates a commute, draws its routes once by dragging on a map, and saves them — repeating for each commute direction.
 
 ## 4. Goals and non-goals
 
 ### Goals (POC)
-1. Let the owner define any number of named routes between a fixed origin and destination by clicking and dragging on a map.
-2. At a scheduled time on weekdays, fetch a traffic-aware ETA for each route and send one Pushover notification.
+1. Let the owner define any number of named **commutes**, each between its own fixed origin and destination, and within each commute any number of named routes, by clicking and dragging on a map.
+2. At each commute's scheduled time(s), fetch a traffic-aware ETA for each of that commute's routes and send one Pushover notification labeled with the commute's name. A commute's schedule is one or more weekday+time rules, not just a single time, so asymmetric weekly patterns (e.g. an earlier Monday departure) don't need a separate commute.
 3. Run locally on a laptop and unattended on a Raspberry Pi.
 4. Establish production-grade engineering hygiene from day one (tests, typing, linting, dependency audit).
 
@@ -59,7 +60,6 @@ An ETA is a snapshot of traffic *now*. A route can degrade while the driver is o
 - Route-drift detection (checking that the returned path matches the drawn path).
 - History, trends, or "usual ETA" comparisons.
 - Validating Google's accuracy against Waze.
-- Home-bound morning direction (the POC covers **work → home only**; see section 7).
 - Any native app, backend service or Watch/Siri integration (Phase 2).
 - Scraping or calling any unofficial Waze endpoint (see Appendix A).
 
@@ -101,84 +101,106 @@ Questions 1, 4 and 5 are "yes" and 2 and 3 are judged acceptable by the owner. O
 
 ## 7. Phase 1 – Functional requirements
 
-Direction for the POC is **work → home**. The config holds one origin and one destination, so swapping them later (or adding a second config) needs no code change.
+The config holds any number of named **commutes** (e.g. "Work to Home", "Home to Work"), each with its own origin, destination, routes and schedule. Sections 7.1–7.4 describe behavior for a single commute; the builder and checker apply it independently to each one the owner has created.
 
 ### 7.1 Route builder (`web/` project: React app)
 
-- **FR-1.** A React web app (the `web/` project, run locally) shows a map with the configured origin and destination. It talks only to the Python JSON API (section 7.5), never directly to Google.
+- **FR-1.** A React web app (the `web/` project, run locally) shows a map with the selected commute's configured origin and destination. It talks only to the Python JSON API (section 7.5), never directly to Google.
 - **FR-2.** The owner can create a route: an initial route between origin and destination is drawn automatically.
 - **FR-3.** The owner can add a via point by clicking/pressing the route line, and move it by dragging. On release, the route is recalculated through the via points and redrawn.
 - **FR-4.** Via points can be removed.
 - **FR-5.** Each route has a **name** chosen by the owner and a distinguishing color.
-- **FR-6.** The owner can create, rename, delete and reorder routes. Any number of routes is supported.
-- **FR-7.** Saving writes the routes to the config file (section 8). The saved definition is: name + ordered list of via points (latitude/longitude).
+- **FR-6.** The owner can create, rename, delete and reorder routes within a commute. Any number of routes per commute is supported. The owner can also create, rename and delete commutes (any number of them) and switch which one is being edited.
+- **FR-7.** Saving writes every commute (name, origin, destination, routes, schedule rules) to the config file (section 8). A route's saved definition is unchanged: name + ordered list of via points (latitude/longitude).
 - **FR-8.** The Google API key is held only by the Python API (`api/`). It is never sent to, or bundled into, the browser app.
 - **FR-9.** Via points are snapped to the nearest road where the API supports it, so a point does not land on the wrong carriageway of a divided avenue. (Best-effort; verify in Phase 0/1.)
 - **FR-10.** Touch-friendly handles (large hit targets), since the page may be used on a phone or tablet.
 
 ### 7.2 Checker
 
-- **FR-11.** For each saved route, the checker issues one traffic-aware `computeRoutes` request (origin → via points → destination, driving mode) departing "now".
+- **FR-11.** For a given commute, and for each of its saved routes, the checker issues one traffic-aware `computeRoutes` request (that commute's origin → via points → destination, driving mode) departing "now".
 - **FR-12.** The checker extracts the route duration and converts it to whole minutes (rounding rule to be fixed in implementation; rounding to nearest minute is the default).
 - **FR-13.** Requests use a response field mask limited to the fields actually needed.
 - **FR-14.** Routes are requested independently, so one failing route does not prevent the others from being reported.
 
 ### 7.3 Notification
 
-- **FR-15.** One Pushover notification is sent per run.
-- **FR-16.** The message lists every route by name with its ETA in minutes, in the **order defined in the config** (default; see open questions), separated by ` · `.
-  Example: `Mordor 50 · City 56 · Toll Road 63`
+- **FR-15.** One Pushover notification is sent per commute per run, labeled with the commute's name.
+- **FR-16.** The message lists every route in that commute by name with its ETA in minutes, in the **order defined in the config** (default; see open questions), separated by ` · `.
+  Example: `Work to Home: Mordor 50 · City 56 · Toll Road 63`
 - **FR-17.** If an individual route fails, it appears as `Name ?` and the other routes are still shown.
-- **FR-18.** If *no* route can be fetched (for example, Google unreachable), send a short failure notification, for example `Couldn't fetch ETAs`, so silence never makes the owner wonder whether the tool is working.
+- **FR-18.** If *no* route in the commute can be fetched (for example, Google unreachable), send a short failure notification, for example `Work to Home: Couldn't fetch ETAs`, so silence never makes the owner wonder whether the tool is working.
 - **FR-19.** Pushover token and user key come from environment configuration, never from the config file in version control.
 
 ### 7.4 Scheduling
 
-- **FR-20.** The checker runs on **weekdays (Mon–Fri)** at a **single time of day configured in the config file**, interpreted in a configured timezone (default `America/Mexico_City`).
-- **FR-21.** Changing the time requires editing only the config file, plus at most one documented command (for example, regenerating the cron entry). The implementation may use cron or a built-in scheduler; it must work unattended on a Raspberry Pi.
-- **FR-22.** A manual "run now" command sends the notification immediately, ignoring the schedule, for testing.
+- **FR-20.** Each commute has its own schedule: one or more rules, each a set of weekdays and one time of day, interpreted in a configured timezone (default `America/Mexico_City`) shared across all commutes. This supports asymmetric weekly patterns (e.g. an earlier Monday departure, a later Tuesday–Friday one for the same commute) without needing a separate commute per pattern.
+- **FR-21.** Changing a commute's schedule, or adding, renaming or deleting a commute, requires editing only the config file, plus at most one documented command (regenerating and reinstalling the generated cron script, which holds one line per commute per schedule rule). The implementation may use cron or a built-in scheduler; it must work unattended on a Raspberry Pi.
+- **FR-22.** A manual "run now" command, given a commute name, sends that commute's notification immediately, ignoring its schedule, for testing.
 
 ### 7.5 JSON API between `web/` and `api/`
 
 The Python project exposes a small local HTTP JSON API for the builder. Endpoint names and payloads are an implementation detail, but the capabilities are required:
 
 - **FR-23.** *Compute a route preview:* given origin, destination and an ordered list of via points, return the drawn path (and its ETA, optionally) so the builder can render it. This calls Google on the builder's behalf, using the server-held key.
-- **FR-24.** *Read config:* return the current saved routes, origin, destination and schedule.
-- **FR-25.** *Save config:* validate and write the routes (and schedule) to the config file. Invalid input returns a clear error and does not corrupt the file.
-- **FR-26.** *Run now:* trigger the checker immediately (the same behavior as FR-22), so the builder can offer a "send me the ETAs now" button.
+- **FR-24.** *Read config:* return every saved commute (routes, origin, destination and schedule rules).
+- **FR-25.** *Save config:* validate and write every commute (and its schedule) to the config file — including commute-name and route-name uniqueness, and no weekday scheduled by more than one rule within a commute. Invalid input returns a clear error and does not corrupt the file.
+- **FR-26.** *Run now:* given a commute name, trigger the checker immediately for that commute (the same behavior as FR-22), so the builder can offer a "send me the ETAs now" button scoped to the commute being edited.
 - **FR-27.** The API listens on localhost only by default. Cross-origin access is limited to the local web app's origin.
 - **FR-28.** The API is **not** required to run on the Raspberry Pi. Only the checker is.
 
 ## 8. Data model and configuration
 
-### Routes and schedule config (illustrative; format YAML or JSON at the builder's discretion)
+### Commutes config (illustrative; format YAML or JSON at the builder's discretion)
 
 ```yaml
 timezone: America/Mexico_City
-schedule:
-  weekdays: [mon, tue, wed, thu, fri]
-  time: "18:30"          # HH:MM local time
-origin:
-  label: Work
-  lat: 19.0000
-  lng: -99.0000
-destination:
-  label: Home
-  lat: 19.0000
-  lng: -99.0000
-routes:
-  - name: City
-    via:
-      - { lat: 19.0000, lng: -99.0000 }
-  - name: Mordor
-    via:
-      - { lat: 19.0000, lng: -99.0000 }
-  - name: Toll Road
-    via:
-      - { lat: 19.0000, lng: -99.0000 }
+commutes:
+  - name: Work to Home
+    origin:
+      label: Work
+      lat: 19.0000
+      lng: -99.0000
+    destination:
+      label: Home
+      lat: 19.0000
+      lng: -99.0000
+    routes:
+      - name: City
+        via:
+          - { lat: 19.0000, lng: -99.0000 }
+      - name: Mordor
+        via:
+          - { lat: 19.0000, lng: -99.0000 }
+      - name: Toll Road
+        via:
+          - { lat: 19.0000, lng: -99.0000 }
+    schedules:
+      - weekdays: [mon, tue, wed, thu, fri]
+        time: "18:30"          # HH:MM local time
+  - name: Home to Work
+    origin:
+      label: Home
+      lat: 19.0000
+      lng: -99.0000
+    destination:
+      label: Work
+      lat: 19.0000
+      lng: -99.0000
+    routes:
+      - name: City
+        via:
+          - { lat: 19.0000, lng: -99.0000 }
+    schedules:
+      # Monday is an earlier start than the rest of the week — two rules on
+      # the same commute, each covering different weekdays.
+      - weekdays: [mon]
+        time: "06:30"
+      - weekdays: [tue, wed, thu, fri]
+        time: "07:30"
 ```
 
-(Coordinates are placeholders.)
+(Coordinates are placeholders. A commute's `schedules` list can be empty — e.g. right after it's created, before the owner has set a time — same as its `origin`/`destination` starting out unset.)
 
 ### Config is the contract and the handoff
 
@@ -324,7 +346,6 @@ One repository, two projects:
 - Automated route-drift detection.
 - Validation of ETA accuracy against Waze or against actual drive times.
 - Mid-drive alerts when the chosen route degrades.
-- Morning (home → work) direction and multiple schedules.
 - Fastest-first ordering (default is config order; see open questions).
 
 ## 15. Phase 2 outline (for context only; separate PRD)

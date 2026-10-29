@@ -1,28 +1,52 @@
-# Illustrative example only (Mexico City, same route as phase0/config.yaml).
-# The real config.yaml is created by the app when you save routes in the
+# Illustrative example only (Mexico City, same routes as phase0/config.yaml).
+# The real config.yaml is created by the app when you save commutes in the
 # builder, and is gitignored since it encodes your real home/work location.
 timezone: America/Mexico_City
-schedule:
-  weekdays: [mon, tue, wed, thu, fri]
-  time: "18:30"
-origin:
-  label: Work (Paseo de la Reforma / Torre Mayor)
-  lat: 19.4284
-  lng: -99.1677
-destination:
-  label: Home (Ciudad Satélite)
-  lat: 19.5095
-  lng: -99.2383
-routes:
-  - name: City
-    color: "#2563eb"
-    via:
-      - { lat: 19.4550, lng: -99.2050 }
-  - name: Mordor
-    color: "#dc2626"
-    via:
-      - { lat: 19.4700, lng: -99.1850 }
-  - name: Toll Road
-    color: "#16a34a"
-    via:
-      - { lat: 19.4850, lng: -99.2150 }
+commutes:
+  - name: Work to Home
+    origin:
+      label: Work (Paseo de la Reforma / Torre Mayor)
+      lat: 19.4284
+      lng: -99.1677
+    destination:
+      label: Home (Ciudad Satélite)
+      lat: 19.5095
+      lng: -99.2383
+    routes:
+      - name: City
+        color: "#2563eb"
+        via:
+          - { lat: 19.4550, lng: -99.2050 }
+      - name: Mordor
+        color: "#dc2626"
+        via:
+          - { lat: 19.4700, lng: -99.1850 }
+      - name: Toll Road
+        color: "#16a34a"
+        via:
+          - { lat: 19.4850, lng: -99.2150 }
+    # One time, every weekday: the drive home is the same regardless of day.
+    schedules:
+      - weekdays: [mon, tue, wed, thu, fri]
+        time: "18:30"
+  - name: Home to Work
+    origin:
+      label: Home (Ciudad Satélite)
+      lat: 19.5095
+      lng: -99.2383
+    destination:
+      label: Work (Paseo de la Reforma / Torre Mayor)
+      lat: 19.4284
+      lng: -99.1677
+    routes:
+      - name: City
+        color: "#2563eb"
+        via:
+          - { lat: 19.4550, lng: -99.2050 }
+    # Monday is an early start; the rest of the week leaves later — two
+    # schedule rules on the same commute, each covering different weekdays.
+    schedules:
+      - weekdays: [mon]
+        time: "06:30"
+      - weekdays: [tue, wed, thu, fri]
+        time: "07:30"

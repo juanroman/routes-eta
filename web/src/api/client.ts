@@ -48,6 +48,9 @@ export function previewRoute(req: PreviewRequest): Promise<PreviewResponse> {
   })
 }
 
-export function runNow(): Promise<RunNowResponse> {
-  return request<RunNowResponse>('/run-now', { method: 'POST' })
+export function runNow(commute: string): Promise<RunNowResponse> {
+  return request<RunNowResponse>('/run-now', {
+    method: 'POST',
+    body: JSON.stringify({ commute }),
+  })
 }

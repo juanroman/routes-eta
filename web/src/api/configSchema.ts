@@ -36,27 +36,47 @@ function checkNamedPoint(value: unknown, path: string, errors: string[]): void {
   }
 }
 
-function checkSchedule(value: unknown, errors: string[]): void {
+function checkScheduleRule(value: unknown, path: string, errors: string[]): void {
   if (!isRecord(value)) {
-    errors.push('schedule: expected an object')
+    errors.push(`${path}: expected an object`)
     return
   }
   if (!Array.isArray(value.weekdays) || value.weekdays.length === 0) {
-    errors.push('schedule.weekdays: expected a non-empty array')
+    errors.push(`${path}.weekdays: expected a non-empty array`)
   } else {
     for (const day of value.weekdays) {
       if (!WEEKDAYS.includes(day as Weekday)) {
-        errors.push(`schedule.weekdays: "${String(day)}" is not a valid weekday`)
+        errors.push(`${path}.weekdays: "${String(day)}" is not a valid weekday`)
       }
     }
   }
   if (typeof value.time !== 'string' || !TIME_PATTERN.test(value.time)) {
-    errors.push('schedule.time: expected "HH:MM" 24-hour local time')
+    errors.push(`${path}.time: expected "HH:MM" 24-hour local time`)
   }
 }
 
-function checkRoute(value: unknown, index: number, errors: string[]): void {
-  const path = `routes[${index}]`
+function checkSchedules(value: unknown, path: string, errors: string[]): void {
+  if (!Array.isArray(value)) {
+    errors.push(`${path}: expected an array`)
+    return
+  }
+  value.forEach((rule, i) => checkScheduleRule(rule, `${path}[${i}]`, errors))
+
+  const seen = new Set<string>()
+  for (const rule of value) {
+    if (!isRecord(rule) || !Array.isArray(rule.weekdays)) continue
+    for (const day of rule.weekdays) {
+      if (seen.has(day as string)) {
+        errors.push(
+          `${path}: weekday "${String(day)}" is scheduled by more than one rule`,
+        )
+      }
+      seen.add(day as string)
+    }
+  }
+}
+
+function checkRoute(value: unknown, path: string, errors: string[]): void {
   if (!isRecord(value)) {
     errors.push(`${path}: expected an object`)
     return
@@ -74,19 +94,50 @@ function checkRoute(value: unknown, index: number, errors: string[]): void {
   }
 }
 
-function checkRoutes(value: unknown, errors: string[]): void {
+function checkRoutes(value: unknown, path: string, errors: string[]): void {
   if (!Array.isArray(value)) {
-    errors.push('routes: expected an array')
+    errors.push(`${path}: expected an array`)
     return
   }
-  value.forEach((route, i) => checkRoute(route, i, errors))
+  value.forEach((route, i) => checkRoute(route, `${path}[${i}]`, errors))
 
   const names = value
     .filter(isRecord)
     .map((route) => route.name)
     .filter((name): name is string => typeof name === 'string')
   if (new Set(names).size !== names.length) {
-    errors.push('routes: route names must be unique')
+    errors.push(`${path}: route names must be unique`)
+  }
+}
+
+function checkCommute(value: unknown, path: string, errors: string[]): void {
+  if (!isRecord(value)) {
+    errors.push(`${path}: expected an object`)
+    return
+  }
+  if (typeof value.name !== 'string' || value.name.length === 0) {
+    errors.push(`${path}.name: expected a non-empty string`)
+  }
+  if (value.origin !== null) checkNamedPoint(value.origin, `${path}.origin`, errors)
+  if (value.destination !== null)
+    checkNamedPoint(value.destination, `${path}.destination`, errors)
+  checkRoutes(value.routes, `${path}.routes`, errors)
+  checkSchedules(value.schedules, `${path}.schedules`, errors)
+}
+
+function checkCommutes(value: unknown, errors: string[]): void {
+  if (!Array.isArray(value)) {
+    errors.push('commutes: expected an array')
+    return
+  }
+  value.forEach((commute, i) => checkCommute(commute, `commutes[${i}]`, errors))
+
+  const names = value
+    .filter(isRecord)
+    .map((commute) => commute.name)
+    .filter((name): name is string => typeof name === 'string')
+  if (new Set(names).size !== names.length) {
+    errors.push('commutes: commute names must be unique')
   }
 }
 
@@ -102,11 +153,7 @@ export function validateConfig(data: unknown): Config {
   if (typeof data.timezone !== 'string') {
     errors.push('timezone: expected a string')
   }
-  checkSchedule(data.schedule, errors)
-  if (data.origin !== null) checkNamedPoint(data.origin, 'origin', errors)
-  if (data.destination !== null)
-    checkNamedPoint(data.destination, 'destination', errors)
-  checkRoutes(data.routes, errors)
+  checkCommutes(data.commutes, errors)
 
   if (errors.length > 0) {
     throw new Error(`Config failed schema validation:\n- ${errors.join('\n- ')}`)

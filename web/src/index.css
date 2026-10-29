@@ -43,6 +43,69 @@ body {
   outline: 2px solid #2563eb;
 }
 
+.commute-tabs ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.commute-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+}
+
+.commute-tab.active {
+  border-color: #2563eb;
+}
+
+.commute-tab input {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.schedule-editor ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.schedule-rule {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem;
+  border: 1px solid #e2e2e2;
+  border-radius: 6px;
+}
+
+.schedule-rule-weekdays {
+  display: flex;
+  gap: 0.2rem;
+}
+
+.schedule-rule-weekdays button {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+}
+
+.schedule-rule-weekdays button.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
 .route-panel ul {
   list-style: none;
   margin: 0;

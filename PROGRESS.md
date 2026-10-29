@@ -33,6 +33,59 @@ Two smaller gaps from prd.md, independent of the Pi, are also still open:
   asks for this on `/preview` and save/read `/config` too, which was never
   added.
 
+### Multiple commutes, each with its own routes and schedule rules (this session)
+
+prd.md previously deferred "morning (home → work) direction and multiple
+schedules" (§14). The owner asked for it now — the real commute isn't
+symmetric (different routes each direction, an earlier Monday departure than
+the rest of the week) — so prd.md was amended (now Draft v0.3: §2–§4, §7, §8,
+§14) rather than treating this as an undocumented deviation, then
+implemented full-stack:
+
+- **Config schema** (`api/app/config_models.py`): replaced the single
+  flat `origin`/`destination`/`routes`/`schedule` with `Config.commutes:
+  list[Commute]`, each a `name` + its own `origin`/`destination`/`routes`
+  and a `schedules: list[ScheduleRule]` (weekdays + time — a commute can
+  have more than one rule, e.g. Monday-only plus Tue–Fri). New validators:
+  commute names unique, route names unique within a commute (moved from the
+  old top-level check), and no weekday scheduled by more than one rule
+  within a commute.
+- **Checker/notification/runner**: `check_commute(commute)` replaces
+  `check_all_routes(config)`; `run_now(commute_name)` looks the commute up
+  by name (raising `CheckerError` if it doesn't exist) and
+  `pushover.format_message` gained a `label` prefix so a notification
+  reads `Work to Home: Mordor 50 · City 56 · Toll Road 63`.
+- **Scheduler/CLI**: `crontab_script(config)` emits one `CRON_TZ=` header
+  plus one cron line per (commute, schedule rule), each invoking `run-now
+  --commute '<name>'` (shell-quoted). `api/README.md` now calls out that
+  renaming/deleting a commute or editing its schedule requires regenerating
+  and reinstalling the crontab, since jobs refer to a commute by name.
+- **JSON API**: `POST /run-now` now takes `{"commute": "..."}` in the body
+  and echoes it back in the response.
+- **Web builder**: new `commute-panel/` (`CommuteTabs` to switch/rename/
+  add/delete commutes, `ScheduleEditor` for a commute's weekday+time rules).
+  `state/routesStore.ts`'s mutators are now commute-scoped
+  (`BuilderState.commutes: CommuteUI[]` + `selectedCommuteId`); `App.tsx`
+  wires the selected commute's slice into the existing `MapView`/
+  `RoutePanel` (both unchanged — they already took plain
+  routes/origin/destination props, confirmed before touching them, so the
+  only parent-side change was narrowing `MapView`'s prop type to drop the
+  `BuilderState` dependency it never needed). "Send ETAs now" now targets
+  the selected commute by name.
+- `fixtures/sample-config.json` and `api/config.example.yaml` rewritten as
+  two commutes ("Work to Home" and "Home to Work", the latter demonstrating
+  the Monday-early schedule) — both test suites load the same fixture
+  (prd.md §11), so the two schemas can't silently diverge.
+- Full test rewrite on both sides for the new shape, plus new cases (schema
+  validators, unknown-commute lookup, multi-rule cron generation, the new
+  `CommuteTabs`/`ScheduleEditor` components). `api/check.sh` and `web`'s
+  `npm run check` both green; no real Google/Pushover calls were made in
+  this environment (no credentials available), so the integration suite
+  and a live browser/dev-server check are still owed before merge.
+- No migration path needed: the real `config.yaml` is gitignored and
+  owner-only (recreated via the builder UI, never hand-edited), so this is
+  a breaking schema change the owner re-enters through the UI.
+
 ### What's been done since slice 2 (this session)
 
 - **Closed out Phase 0's paperwork.** `phase0/results.md` was a blank

@@ -13,7 +13,7 @@ export interface NamedPoint {
 
 export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
 
-export interface Schedule {
+export interface ScheduleRule {
   weekdays: Weekday[]
   time: string
 }
@@ -24,12 +24,17 @@ export interface RouteDef {
   via: LatLng[]
 }
 
-export interface Config {
-  timezone: string
-  schedule: Schedule
+export interface Commute {
+  name: string
   origin: NamedPoint | null
   destination: NamedPoint | null
   routes: RouteDef[]
+  schedules: ScheduleRule[]
+}
+
+export interface Config {
+  timezone: string
+  commutes: Commute[]
 }
 
 export interface PreviewRequest {
@@ -50,6 +55,7 @@ export interface RouteResult {
 }
 
 export interface RunNowResponse {
+  commute: string
   message: string
   results: RouteResult[]
 }

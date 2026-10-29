@@ -4,10 +4,7 @@ import type { Config, PreviewRequest } from './types'
 
 const EMPTY_CONFIG: Config = {
   timezone: 'America/Mexico_City',
-  schedule: { weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'], time: '18:30' },
-  origin: null,
-  destination: null,
-  routes: [],
+  commutes: [],
 }
 
 function mockFetchOnce(status: number, body: unknown): void {
@@ -39,7 +36,9 @@ describe('getConfig', () => {
   it('throws ApiError when the response fails config-schema validation', async () => {
     mockFetchOnce(200, {
       ...EMPTY_CONFIG,
-      schedule: { weekdays: ['mon'], time: 'noon' },
+      commutes: [
+        { name: 'Work to Home', schedules: [{ weekdays: ['mon'], time: 'noon' }] },
+      ],
     })
 
     await expect(getConfig()).rejects.toThrow(ApiError)
@@ -86,24 +85,28 @@ describe('previewRoute', () => {
 })
 
 describe('runNow', () => {
-  it('POSTs to /api/run-now and returns the result', async () => {
+  it('POSTs to /api/run-now with the commute name and returns the result', async () => {
     mockFetchOnce(200, {
-      message: 'City 56',
+      commute: 'Work to Home',
+      message: 'Work to Home: City 56',
       results: [{ name: 'City', minutes: 56, error: null }],
     })
 
-    const result = await runNow()
+    const result = await runNow('Work to Home')
 
-    expect(result.message).toBe('City 56')
+    expect(result.message).toBe('Work to Home: City 56')
     expect(fetch).toHaveBeenCalledWith(
       '/api/run-now',
-      expect.objectContaining({ method: 'POST' }),
+      expect.objectContaining({
+        method: 'POST',
+        body: JSON.stringify({ commute: 'Work to Home' }),
+      }),
     )
   })
 
   it('throws ApiError with the detail message on a non-2xx response', async () => {
     mockFetchOnce(400, { detail: 'no routes are configured' })
-    await expect(runNow()).rejects.toThrow(ApiError)
-    await expect(runNow()).rejects.toThrow('no routes are configured')
+    await expect(runNow('Work to Home')).rejects.toThrow(ApiError)
+    await expect(runNow('Work to Home')).rejects.toThrow('no routes are configured')
   })
 })
