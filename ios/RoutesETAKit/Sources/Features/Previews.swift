@@ -4,12 +4,14 @@
 
   @MainActor
   private func previewRoot() -> some View {
-    RootView(
-      store: ConfigStore(repository: InMemoryConfigRepository()),
+    let repository = InMemoryConfigRepository()
+    return RootView(
+      store: ConfigStore(repository: repository),
       router: AppRouter(),
       placeSearch: MockPlaceSearchService(),
       savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()),
-      routePreview: MockRoutePreviewService())
+      routePreview: MockRoutePreviewService(),
+      etaService: MockETAService(repository: repository))
   }
 
   #Preview("Commutes") { previewRoot() }

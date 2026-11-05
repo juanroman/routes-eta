@@ -10,6 +10,7 @@ struct RoutesETAApp: App {
   @State private var savedPlaces: SavedPlacesStore
   @State private var router = AppRouter()
   private let placeSearch: any PlaceSearchService
+  private let etaService: any ETAService
 
   /// The commute config still runs on in-memory mocks (real API client comes in a
   /// later phase); place search and Home/Work use the real MapKit/UserDefaults
@@ -17,7 +18,11 @@ struct RoutesETAApp: App {
   /// and start from a clean slate.
   init() {
     let useMocks = CommandLine.arguments.contains("-mock-services")
-    _store = State(initialValue: ConfigStore(repository: InMemoryConfigRepository()))
+    // One repository shared by the store and the mock ETA service, so ETAs
+    // reflect what the user just edited.
+    let configRepository = InMemoryConfigRepository()
+    _store = State(initialValue: ConfigStore(repository: configRepository))
+    etaService = MockETAService(repository: configRepository)
     if useMocks {
       placeSearch = MockPlaceSearchService()
       _savedPlaces = State(
@@ -33,7 +38,7 @@ struct RoutesETAApp: App {
     WindowGroup {
       RootView(
         store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-        routePreview: MockRoutePreviewService())
+        routePreview: MockRoutePreviewService(), etaService: etaService)
     }
   }
 }

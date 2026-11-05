@@ -212,6 +212,51 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertEqual(count.label, "No via points")
   }
 
+  @MainActor
+  func testShowETAsListsEachRouteAndCanBeRefreshed() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Work to Home"].tap()
+
+    let button = app.buttons["show-etas"]
+    XCTAssertTrue(button.waitForExistence(timeout: 5))
+    XCTAssertTrue(button.isEnabled)
+    button.tap()
+
+    // One chip per route, in the commute's order, each with minutes.
+    let city = app.descendants(matching: .any)["eta-City"]
+    XCTAssertTrue(city.waitForExistence(timeout: 10))
+    XCTAssertTrue(city.label.contains("min"))
+    let mordor = app.descendants(matching: .any)["eta-Mordor"]
+    XCTAssertTrue(mordor.exists)
+    // Exactly one of the two chips is marked as the quickest.
+    XCTAssertNotEqual(city.label.contains("Fastest"), mordor.label.contains("Fastest"))
+
+    app.buttons["eta-refresh"].tap()
+    XCTAssertTrue(app.descendants(matching: .any)["eta-City"].waitForExistence(timeout: 10))
+
+    app.buttons["Done"].tap()
+    XCTAssertTrue(button.waitForExistence(timeout: 5))
+  }
+
+  @MainActor
+  func testShowETAsIsDisabledUntilTheCommuteIsComplete() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+
+    app.buttons["Add Commute"].tap()
+    let field = app.alerts.textFields["Name"]
+    XCTAssertTrue(field.waitForExistence(timeout: 5))
+    field.typeText("Gym")
+    app.alerts.buttons["Add"].tap()
+    app.staticTexts["Gym"].tap()
+
+    XCTAssertFalse(app.buttons["show-etas"].isEnabled)
+    XCTAssertTrue(app.staticTexts["Set origin and destination first"].exists)
+  }
+
   private func waitForLabel(
     of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
     line: UInt = #line
