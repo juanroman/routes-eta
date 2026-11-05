@@ -7,14 +7,16 @@ public struct RootView: View {
   private let store: ConfigStore
   private let placeSearch: any PlaceSearchService
   private let savedPlaces: SavedPlacesStore
+  private let routePreview: any RoutePreviewService
 
   public init(
     store: ConfigStore, router: AppRouter, placeSearch: any PlaceSearchService,
-    savedPlaces: SavedPlacesStore
+    savedPlaces: SavedPlacesStore, routePreview: any RoutePreviewService
   ) {
     self.store = store
     self.placeSearch = placeSearch
     self.savedPlaces = savedPlaces
+    self.routePreview = routePreview
     self.router = router
   }
 
@@ -28,7 +30,8 @@ public struct RootView: View {
               store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
               commuteID: id)
           case .routeEditor(let commuteID, let route):
-            RouteEditorView(store: store, commuteID: commuteID, routeIndex: route)
+            RouteEditorView(
+              store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
           case .scheduleEditor(let commuteID):
             ScheduleEditorView(store: store, commuteID: commuteID)
           }

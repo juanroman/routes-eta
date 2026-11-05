@@ -48,7 +48,7 @@ immediately; Phase 2's editors will add save/discard.
   owned by another rule are disabled and a rule's last day can't be switched off,
   so overlap/empty rules can't be created (the store still validates);
   add/delete rule (delete confirmed); timezone shown as a footer.
--  2d MapKit via-point editor (riskiest; spike
+- 2d MapKit via-point editor (riskiest; spike
   tap-on-line and drag first).
 
 ## Status: Phase 1 — done (POC validated by the owner)
