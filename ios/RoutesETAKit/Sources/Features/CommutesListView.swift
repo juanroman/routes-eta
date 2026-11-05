@@ -53,7 +53,7 @@ struct CommutesListView: View {
       }
       Button("Cancel", role: .cancel) {}
     } message: { entry in
-      Text(deleteWarning(for: entry.commute))
+      Text(entry.commute.deletionWarning)
     }
     .alert("Couldn't save", isPresented: hasError) {
       Button("OK", role: .cancel) {}
@@ -91,12 +91,6 @@ struct CommutesListView: View {
 
   private var isConfirmingDelete: Binding<Bool> {
     Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
-  }
-
-  private func deleteWarning(for commute: Commute) -> String {
-    let count = commute.routes.count
-    guard count > 0 else { return "This can't be undone." }
-    return "Its \(count) \(count == 1 ? "route" : "routes") and schedule will be deleted too."
   }
 
   private var hasError: Binding<Bool> {

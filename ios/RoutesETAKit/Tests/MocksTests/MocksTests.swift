@@ -91,3 +91,16 @@ struct MocksTests {
     #expect(try await service.run(commute: "C").message == "C: Couldn't fetch ETAs")
   }
 }
+
+struct MockPlaceSearchTests {
+  @Test func homeAndWorkAreKeywordsNotSearchResults() async throws {
+    let service = MockPlaceSearchService()
+    #expect(try await service.suggestions(for: "home").isEmpty)
+    #expect(try await service.suggestions(for: "work").isEmpty)
+  }
+
+  @Test func suggestionsCarryAnAddressLine() async throws {
+    let found = try await MockPlaceSearchService().suggestions(for: "zoc")
+    #expect(found.first?.subtitle == MockPlaceSearchService.address)
+  }
+}

@@ -20,3 +20,5 @@ line_length:
 identifier_name:
   min_length: 2
   excluded: [id, x, y]
+opening_brace:
+  ignore_multiline_function_signatures: true # swift-format puts the brace on its own line

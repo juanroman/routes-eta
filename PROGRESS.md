@@ -32,6 +32,18 @@ commute detail, and placeholder route/schedule editors. The app composes the
 mocks in `RoutesETAApp`. Decision: list-level add/rename/delete persist
 immediately; Phase 2's editors will add save/discard.
 
+**Phase 2 (in slices; one PR each):**
+- 2a commute basics (this PR): rename and delete (with confirmation) from the
+  commute detail, origin/destination picker modeled on Calendar's Location field (real MapKit
+  `MKLocalSearchCompleter`, in the new `Platform` target; mock for tests/UI tests)
+  plus Maps-style Home/Work keyword shortcuts (iOS exposes no system Home/Work,
+  so the app keeps its own, in UserDefaults; picking one copies coordinates into
+  the commute), `ConfigStore.updateCommute` as the single
+  validated write path for all editors.
+- 2b routes list (create/rename/reorder/delete with confirmation, color
+  picker), 2c schedule editor, 2d MapKit via-point editor (riskiest; spike
+  tap-on-line and drag first).
+
 ## Status: Phase 1 — done (POC validated by the owner)
 
 Re-evaluated against prd.md §12's actual exit criteria. Update: the owner

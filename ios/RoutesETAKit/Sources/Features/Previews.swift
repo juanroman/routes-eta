@@ -6,7 +6,9 @@
   private func previewRoot() -> some View {
     RootView(
       store: ConfigStore(repository: InMemoryConfigRepository()),
-      router: AppRouter())
+      router: AppRouter(),
+      placeSearch: MockPlaceSearchService(),
+      savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()))
   }
 
   #Preview("Commutes") { previewRoot() }

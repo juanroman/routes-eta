@@ -58,3 +58,22 @@ public enum ETAServiceError: Error, Equatable, Sendable {
 public protocol ETAService: Sendable {
   func run(commute: String) async throws -> ETAReport
 }
+
+/// Finds places to use as a commute's origin or destination, in two steps like
+/// Calendar's Location field: cheap suggestions while typing, then resolving the
+/// chosen one to coordinates. The real implementation uses MapKit.
+public protocol PlaceSearchService: Sendable {
+  /// An empty query returns no suggestions.
+  func suggestions(for query: String) async throws -> [PlaceSuggestion]
+  func resolve(_ suggestion: PlaceSuggestion) async throws -> NamedPoint
+}
+
+public enum PlaceSearchError: Error, Equatable, Sendable {
+  case notFound
+}
+
+/// Where the user's "Home" and "Work" shortcuts are kept (on the device).
+public protocol SavedPlacesRepository: Sendable {
+  func load() async throws -> SavedPlaces
+  func save(_ places: SavedPlaces) async throws
+}

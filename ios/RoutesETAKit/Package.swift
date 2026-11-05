@@ -11,14 +11,19 @@ let package = Package(
   products: [
     .library(name: "Domain", targets: ["Domain"]),
     .library(name: "Mocks", targets: ["Mocks"]),
+    .library(name: "Platform", targets: ["Platform"]),
     .library(name: "Features", targets: ["Features"]),
   ],
   targets: [
     .target(name: "Domain", swiftSettings: strict),
     .target(name: "Mocks", dependencies: ["Domain"], swiftSettings: strict),
+    // System-framework implementations of the Domain protocols (MapKit, UserDefaults).
+    .target(name: "Platform", dependencies: ["Domain"], swiftSettings: strict),
     .target(name: "Features", dependencies: ["Domain", "Mocks"], swiftSettings: strict),
     .testTarget(name: "DomainTests", dependencies: ["Domain"], swiftSettings: strict),
     .testTarget(name: "MocksTests", dependencies: ["Mocks", "Domain"], swiftSettings: strict),
+    .testTarget(
+      name: "PlatformTests", dependencies: ["Platform", "Domain"], swiftSettings: strict),
     .testTarget(
       name: "FeaturesTests", dependencies: ["Features", "Domain", "Mocks"], swiftSettings: strict),
   ],
