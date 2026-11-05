@@ -30,7 +30,7 @@ public struct RootView: View {
           case .routeEditor(let commuteID, let route):
             RouteEditorView(store: store, commuteID: commuteID, routeIndex: route)
           case .scheduleEditor(let commuteID):
-            ScheduleEditorPlaceholderView(store: store, commuteID: commuteID)
+            ScheduleEditorView(store: store, commuteID: commuteID)
           }
         }
     }
