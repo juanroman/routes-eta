@@ -25,9 +25,10 @@ public struct RootView: View {
           switch route {
           case .commute(let id):
             CommuteDetailView(
-              store: store, placeSearch: placeSearch, savedPlaces: savedPlaces, commuteID: id)
-          case .routeEditor(let commuteID, let routeName):
-            RouteEditorPlaceholderView(store: store, commuteID: commuteID, routeName: routeName)
+              store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
+              commuteID: id)
+          case .routeEditor(let commuteID, let route):
+            RouteEditorView(store: store, commuteID: commuteID, routeIndex: route)
           case .scheduleEditor(let commuteID):
             ScheduleEditorPlaceholderView(store: store, commuteID: commuteID)
           }

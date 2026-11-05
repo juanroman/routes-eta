@@ -98,6 +98,39 @@ final class RoutesETAUITests: XCTestCase {
     waitForLabel(of: app.buttons["endpoint-To"], toContain: "Home")
   }
 
+  @MainActor
+  func testAddRenameRecolorAndDeleteARoute() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Home to Work"].tap()
+
+    // Adding opens the new route's editor.
+    app.buttons["add-route"].tap()
+    let name = app.textFields["route-name"]
+    XCTAssertTrue(name.waitForExistence(timeout: 5))
+    XCTAssertEqual(name.value as? String, "Route 2")
+
+    name.clearAndType("Toll Road")
+    app.buttons["color-#16a34a"].tap()
+    app.navigationBars.buttons.firstMatch.tap()  // back; commits the name
+
+    let row = app.staticTexts["Toll Road"]
+    XCTAssertTrue(row.waitForExistence(timeout: 5))
+
+    // Delete asks first; Cancel keeps it, confirming removes it.
+    row.swipeLeft()
+    app.buttons["Delete"].tap()
+    XCTAssertTrue(app.alerts.buttons["Delete Route"].waitForExistence(timeout: 5))
+    app.alerts.buttons["Cancel"].tap()
+    XCTAssertTrue(row.exists)
+
+    row.swipeLeft()
+    app.buttons["Delete"].tap()
+    app.alerts.buttons["Delete Route"].tap()
+    XCTAssertTrue(row.waitForNonExistence(timeout: 5))
+  }
+
   private func waitForLabel(
     of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
     line: UInt = #line

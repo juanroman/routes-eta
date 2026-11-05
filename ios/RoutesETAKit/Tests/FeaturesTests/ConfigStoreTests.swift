@@ -179,3 +179,60 @@ struct SavedPlacesStoreTests {
     #expect(configStore.entry(id: id)?.commute.origin == NamedPoint(label: "Work", lat: 1, lng: 2))
   }
 }
+
+@MainActor
+struct RouteEditingStoreTests {
+  struct Fixture {
+    let store: ConfigStore
+    let id: CommuteEntry.ID
+    let repository: InMemoryConfigRepository
+  }
+
+  private func loaded() async throws -> Fixture {
+    let repository = InMemoryConfigRepository()
+    let store = ConfigStore(repository: repository)
+    await store.load()
+    return Fixture(store: store, id: try #require(store.entries.first?.id), repository: repository)
+  }
+
+  @Test func addRouteAppendsPersistsAndReturnsItsIndex() async throws {
+    let fixture = try await loaded()
+    let (store, id, repository) = (fixture.store, fixture.id, fixture.repository)
+    let result = await store.addRoute(to: id)
+    #expect(result == .success(2))
+    #expect(store.entry(id: id)?.commute.routes.last?.name == "Route 3")
+    #expect(try await repository.load().commutes.first?.routes.count == 3)
+  }
+
+  @Test func deleteRouteRemovesOnlyThatRoute() async throws {
+    let fixture = try await loaded()
+    let (store, id) = (fixture.store, fixture.id)
+    #expect(await store.deleteRoute(in: id, at: 0) == nil)
+    #expect(store.entry(id: id)?.commute.routes.map(\.name) == ["Mordor"])
+  }
+
+  @Test func deleteRouteOutOfRangeIsANoOp() async throws {
+    let fixture = try await loaded()
+    let (store, id) = (fixture.store, fixture.id)
+    #expect(await store.deleteRoute(in: id, at: 9) == nil)
+    #expect(store.entry(id: id)?.commute.routes.count == 2)
+  }
+
+  @Test func renameAndRecolorGoThroughValidation() async throws {
+    let fixture = try await loaded()
+    let (store, id) = (fixture.store, fixture.id)
+    #expect(
+      await store.updateCommute(id: id) { $0.routes[0].color = RoutePalette.colors[3] } == nil)
+    #expect(store.entry(id: id)?.commute.routes[0].color == RoutePalette.colors[3])
+    #expect(await store.updateCommute(id: id) { $0.routes[0].name = "Mordor" } != nil)
+    #expect(store.entry(id: id)?.commute.routes[0].name == "City")
+  }
+
+  @Test func reorderingKeepsRoutesIntact() async throws {
+    let fixture = try await loaded()
+    let (store, id) = (fixture.store, fixture.id)
+    let before = try #require(store.entry(id: id)?.commute.routes)
+    #expect(await store.updateCommute(id: id) { $0.routes.reverse() } == nil)
+    #expect(store.entry(id: id)?.commute.routes == before.reversed())
+  }
+}

@@ -67,6 +67,22 @@ public final class ConfigStore {
     return await apply(updated)
   }
 
+  /// Appends a default-named route. Returns its index, or the error message.
+  public func addRoute(to id: CommuteEntry.ID) async -> Result<Int, ConfigStoreError> {
+    var index = 0
+    if let message = await updateCommute(id: id, { index = $0.addRoute() }) {
+      return .failure(ConfigStoreError(message: message))
+    }
+    return .success(index)
+  }
+
+  @discardableResult
+  public func deleteRoute(in id: CommuteEntry.ID, at index: Int) async -> String? {
+    await updateCommute(id: id) {
+      if $0.routes.indices.contains(index) { $0.routes.remove(at: index) }
+    }
+  }
+
   @discardableResult
   public func deleteCommute(id: CommuteEntry.ID) async -> String? {
     await apply(entries.filter { $0.id != id })
@@ -83,4 +99,8 @@ public final class ConfigStore {
       return "Couldn't save your changes."
     }
   }
+}
+
+public struct ConfigStoreError: Error, Equatable, Sendable {
+  public let message: String
 }
