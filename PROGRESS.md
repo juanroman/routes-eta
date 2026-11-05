@@ -48,8 +48,16 @@ immediately; Phase 2's editors will add save/discard.
   owned by another rule are disabled and a rule's last day can't be switched off,
   so overlap/empty rules can't be created (the store still validates);
   add/delete rule (delete confirmed); timezone shown as a footer.
-- 2d MapKit via-point editor (riskiest; spike
-  tap-on-line and drag first).
+- 2d MapKit via-point editor (this PR): the route editor now has a map on top
+  (route line in its color, origin/destination markers, numbered handles) with
+  the name/color/delete form below. Tap the line to add a via point (inserted in
+  route order, ported from `web/src/map/polylineGeometry.ts`), drag a handle to
+  move it (committed on release; the preview is re-requested, latest wins, and
+  the old line stays visible while loading), tap a handle to select it and
+  Remove. Cap of 23 via points. Spike findings are recorded in `RouteMapView`
+  (use `.global` for `MapProxy.convert`; taps near a handle are ignored by the
+  map handler). Preview still comes from the mock (straight lines); real Google
+  routes arrive when `api/` is connected.
 
 ## Status: Phase 1 — done (POC validated by the owner)
 
