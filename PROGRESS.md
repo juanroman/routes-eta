@@ -3,28 +3,41 @@
 Tracks where Phase 1 actually is, across sessions. See `prd.md` for the
 requirements this implements. Phase 0 is done (`phase0/results.md`).
 
-## Status: Phase 1 — functionally built, not signed off
+## iOS app (`ios/`) — Phase 0 done, Phase 1 next
 
-Re-evaluated against prd.md §12's actual exit criteria. Verdict: **not
-done**. Everything is built and working against the real Google and
-Pushover APIs on a laptop; the one remaining blocker is that nothing has
-ever run unattended on the Raspberry Pi.
+Native SwiftUI MVP: commute/routes editor + a "show ETAs" button, no push
+notifications. Built mock-first (all UI against in-memory services), real
+networking to `api/` in a later phase. Plan: Phase 0 project, Phase 1
+skeleton + navigation, Phase 2 commute/routes editor, Phase 3 ETAs.
+
+**Phase 0 (done):** `ios/RoutesETA/` (thin app target) + `ios/RoutesETAKit/`
+(local package: `Domain`, `Mocks`, `Features`; `Domain`/`Mocks` stay
+platform-neutral so a future watchOS target can reuse them). iOS 27.2, Swift 6,
+strict concurrency `complete`, warnings as errors (verified: a deliberate
+warning fails the build), Swift Testing, swift-format (strict) and SwiftLint
+(strict, `brew install swiftlint`). `ios/check.sh` runs all of it; it is
+deliberately **not** hooked into the root `check.sh`, which also runs on the
+Raspberry Pi where Xcode doesn't exist. See `ios/README.md`.
+
+## Status: Phase 1 — done (POC validated by the owner)
+
+Re-evaluated against prd.md §12's actual exit criteria. Update: the owner
+has since confirmed the Raspberry Pi deployment is working and the Phase 0
+billing question (Q4) is resolved; this file simply hadn't been updated.
+Remaining gaps are the smaller items listed below, plus the week of real use
+(criterion 6).
 
 | # | Success criterion (prd.md §12) | Status |
 |---|---|---|
 | 1 | Set up 3 routes in builder in <10 min | Likely met, never formally timed |
-| 2 | Notification arrives automatically at the scheduled time, no manual step | **Not met** — only ever triggered manually; no cron job has actually been installed anywhere |
-| 3 | Changing schedule time needs only the config file + one documented command | Built and documented (`uv run python -m app.cli crontab` + the install one-liner in `api/README.md`), never actually exercised |
+| 2 | Notification arrives automatically at the scheduled time, no manual step | Met — Pi deployment confirmed working by the owner |
+| 3 | Changing schedule time needs only the config file + one documented command | Built and documented (`uv run python -m app.cli crontab` + the install one-liner in `api/README.md`); in use on the Pi |
 | 4 | Failure notification sent instead of silence when Google is unreachable | Met — unit- and integration-tested (`pushover.format_message`'s all-failed path, `checker.check_all_routes`'s per-route independence) |
-| 5 | Top-level check passes for both projects, **and the integration suite passes on both the laptop and the Raspberry Pi** | Half met — laptop: yes, repeatedly; **Raspberry Pi: never tested**, nothing has run on physical Pi hardware |
-| 6 | Owner finds it useful enough to keep running for a week | Can't be assessed yet — built today |
+| 5 | Top-level check passes for both projects, **and the integration suite passes on both the laptop and the Raspberry Pi** | Met per the owner (laptop and Pi both working). Not re-verified from this session |
+| 6 | Owner finds it useful enough to keep running for a week | Met per the owner — real Pushover notifications received as expected; some minor bugs may remain, but the POC's purpose is considered fulfilled |
 
-**The real blocker is a single thing: deploy to the Pi, install the cron
-job, and confirm one real unattended scheduled run.** That alone closes
-criteria 2 and 5. See `api/README.md`'s "Checker, notification and
-scheduling" section for the exact steps.
-
-Two smaller gaps from prd.md, independent of the Pi, are also still open:
+The Pi deployment and billing tier were previously the blockers; both are
+now resolved. Two smaller gaps from prd.md remain open:
 - **FR-9** (via points snapped to the nearest road) — not implemented at
   all; the PRD marks it "best-effort," but right now it's silently absent
   rather than a documented decision.
@@ -96,7 +109,8 @@ implemented full-stack:
   commute routes (gitignored) so Q2's plausibility check is against the
   owner's actual roads. Q4 (billing tier) and the Pi side of Q5 are
   explicitly left for the owner — no GCP console access or Pi hardware from
-  here.
+  here. (Both since resolved by the owner; `phase0/results.md` may still
+  need the actual answers recorded.)
 - **Shared config-schema validation (prd.md §11).** New `fixtures/sample-
   config.json` at the repo root, loaded by both projects' tests (previously
   each hand-rolled its own sample config, so they could silently drift).
@@ -250,8 +264,6 @@ slice 2" above) — `main` is now the only branch that matters.
 
 ## Not built yet / open
 
-- **Raspberry Pi deployment** — the one real blocker to calling Phase 1
-  done (success criteria 2 and 5). Nothing has run on physical Pi hardware.
 - **FR-9** (snap via points to nearest road) — not implemented.
 - **prd.md §11's "Web-to-API check"** for `/preview` and save/read
   `/config` — only built for `/run-now` so far.
@@ -271,12 +283,11 @@ cd web && npm run dev                            # builder, separate shell
 Repo: `https://github.com/juanroman/routes-eta`, `main` branch, no other
 branches in active use.
 
-To actually close out Phase 1: deploy to the Pi (`git clone`, copy `.env` +
-`api/config.yaml` over since both are gitignored, `uv sync`, smoke-test with
-`uv run python -m app.cli run-now`, then generate and install the cron job
-with `uv run python -m app.cli crontab` — see `api/README.md`'s "Checker,
-notification and scheduling" section for the exact commands), and confirm
-one real unattended scheduled run arrives.
+The Pi is deployed and running (setup steps are in `api/README.md`'s
+"Checker, notification and scheduling" section). To close out Phase 1:
+nothing is blocking. The owner considers the POC validated; the remaining
+gaps above are optional polish, and Phase 2 (prd.md §15) would be scoped in
+a separate PRD.
 
 This doc plus the code and tests in `api/` and `web/` is the full picture —
 no other plan file to track down.
