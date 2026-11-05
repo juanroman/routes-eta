@@ -1,0 +1,20 @@
+included:
+  - RoutesETAKit/Sources
+  - RoutesETAKit/Tests
+  - RoutesETA/RoutesETA
+  - RoutesETA/RoutesETATests
+  - RoutesETA/RoutesETAUITests
+excluded:
+  - "**/.build"
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - force_unwrapping
+  - sorted_imports
+line_length:
+  warning: 100
+  error: 120
+identifier_name:
+  min_length: 2
+  excluded: [id, x, y]
