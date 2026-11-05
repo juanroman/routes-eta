@@ -6,9 +6,18 @@ final class RoutesETAUITests: XCTestCase {
   }
 
   @MainActor
-  func testAppLaunches() throws {
+  func testDrillIntoACommuteAndBack() throws {
     let app = XCUIApplication()
     app.launch()
-    XCTAssertTrue(app.wait(for: .runningForeground, timeout: 10))
+
+    let commute = app.staticTexts["Work to Home"]
+    XCTAssertTrue(commute.waitForExistence(timeout: 10))
+    commute.tap()
+
+    XCTAssertTrue(app.buttons["Show ETAs"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.staticTexts["City"].exists)
+
+    app.navigationBars.buttons.firstMatch.tap()
+    XCTAssertTrue(app.navigationBars["Commutes"].waitForExistence(timeout: 5))
   }
 }

@@ -3,7 +3,7 @@
 Tracks where Phase 1 actually is, across sessions. See `prd.md` for the
 requirements this implements. Phase 0 is done (`phase0/results.md`).
 
-## iOS app (`ios/`) — Phase 0 done, Phase 1 next
+## iOS app (`ios/`) — Phases 0–1 done, Phase 2 next
 
 Native SwiftUI MVP: commute/routes editor + a "show ETAs" button, no push
 notifications. Built mock-first (all UI against in-memory services), real
@@ -18,6 +18,19 @@ warning fails the build), Swift Testing, swift-format (strict) and SwiftLint
 (strict, `brew install swiftlint`). `ios/check.sh` runs all of it; it is
 deliberately **not** hooked into the root `check.sh`, which also runs on the
 Raspberry Pi where Xcode doesn't exist. See `ios/README.md`.
+
+**Phase 1 (done):** `Domain` models mirroring `api/app/config_models.py`
+(same JSON keys), validation mirroring its validators (`ConfigIssue`), schedule
+summaries ("Tue–Fri · 07:30"), and the `ConfigRepository` / `RoutePreviewService`
+/ `ETAService` protocols. `Mocks`: `SampleData` (a contract test keeps it equal
+to `fixtures/sample-config.json`), in-memory repository that rejects invalid
+configs like the API's 422, deterministic preview and ETA mocks (a route named
+"...fail..." fails, to exercise partial/all-failed UI). `Features`: `ConfigStore`
+(validate, then persist; commutes get a stable UI id since names are renameable),
+`AppRouter` (typed `NavigationStack` path), commutes list (add/rename/delete),
+commute detail, and placeholder route/schedule editors. The app composes the
+mocks in `RoutesETAApp`. Decision: list-level add/rename/delete persist
+immediately; Phase 2's editors will add save/discard.
 
 ## Status: Phase 1 — done (POC validated by the owner)
 

@@ -6,6 +6,8 @@ included:
   - RoutesETA/RoutesETAUITests
 excluded:
   - "**/.build"
+disabled_rules:
+  - trailing_comma # swift-format owns comma style
 opt_in_rules:
   - empty_count
   - explicit_init
