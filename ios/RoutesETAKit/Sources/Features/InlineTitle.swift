@@ -11,3 +11,15 @@ extension View {
     #endif
   }
 }
+
+/// iOS Edit/Done button (reorder mode); empty on the macOS test host, where
+/// `EditButton` doesn't exist.
+struct ReorderButton: View {
+  var body: some View {
+    #if os(iOS)
+      EditButton()
+    #else
+      EmptyView()
+    #endif
+  }
+}

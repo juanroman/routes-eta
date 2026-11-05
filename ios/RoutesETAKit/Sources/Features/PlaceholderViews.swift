@@ -1,22 +1,7 @@
 import Domain
 import SwiftUI
 
-/// Stand-ins so navigation can be built and tested now; replaced in Phase 2.
-struct RouteEditorPlaceholderView: View {
-  let store: ConfigStore
-  let commuteID: CommuteEntry.ID
-  let routeName: String
-
-  var body: some View {
-    ContentUnavailableView(
-      routeName, systemImage: "map",
-      description: Text("The route editor arrives in Phase 2.")
-    )
-    .navigationTitle(routeName)
-    .inlineNavigationTitle()
-  }
-}
-
+/// Stand-in until the schedule editor (slice 2c).
 struct ScheduleEditorPlaceholderView: View {
   let store: ConfigStore
   let commuteID: CommuteEntry.ID

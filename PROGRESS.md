@@ -40,8 +40,11 @@ immediately; Phase 2's editors will add save/discard.
   so the app keeps its own, in UserDefaults; picking one copies coordinates into
   the commute), `ConfigStore.updateCommute` as the single
   validated write path for all editors.
-- 2b routes list (create/rename/reorder/delete with confirmation, color
-  picker), 2c schedule editor, 2d MapKit via-point editor (riskiest; spike
+- 2b routes list (this PR): add (opens the new route's editor, named "Route N"
+  in the next palette color, like the web builder), rename + color in a route
+  editor, swipe-delete with confirmation, reorder via Edit. Routes are addressed
+  by index in navigation since the editor renames them.
+- 2c schedule editor, 2d MapKit via-point editor (riskiest; spike
   tap-on-line and drag first).
 
 ## Status: Phase 1 — done (POC validated by the owner)

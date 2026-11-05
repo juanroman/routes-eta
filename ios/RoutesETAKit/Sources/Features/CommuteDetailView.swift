@@ -3,6 +3,7 @@ import SwiftUI
 
 struct CommuteDetailView: View {
   let store: ConfigStore
+  let router: AppRouter
   let placeSearch: any PlaceSearchService
   let savedPlaces: SavedPlacesStore
   let commuteID: CommuteEntry.ID
@@ -33,6 +34,7 @@ struct CommuteDetailView: View {
       .navigationTitle(commute.name)
       .inlineNavigationTitle()
       .toolbar {
+        ToolbarItem(placement: .primaryAction) { ReorderButton() }
         ToolbarItem(placement: .primaryAction) {
           Menu("More", systemImage: "ellipsis.circle") {
             Button("Rename", systemImage: "pencil") {
@@ -54,21 +56,7 @@ struct CommuteDetailView: View {
         endpointRow(.destination, point: commute.destination)
       }
 
-      Section("Routes") {
-        ForEach(commute.routes, id: \.name) { route in
-          NavigationLink(value: AppRoute.routeEditor(commute: commuteID, routeName: route.name)) {
-            HStack {
-              Circle().fill(Color(hex: route.color)).frame(width: 14, height: 14)
-              Text(route.name)
-              Spacer()
-              Text("\(route.via.count) via").foregroundStyle(.secondary)
-            }
-          }
-        }
-        if commute.routes.isEmpty {
-          Text("No routes yet").foregroundStyle(.secondary)
-        }
-      }
+      RoutesSection(store: store, router: router, commuteID: commuteID, routes: commute.routes)
 
       Section("Schedule") {
         NavigationLink(value: AppRoute.scheduleEditor(commute: commuteID)) {
