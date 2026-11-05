@@ -6,6 +6,7 @@ struct CommuteDetailView: View {
   let router: AppRouter
   let placeSearch: any PlaceSearchService
   let savedPlaces: SavedPlacesStore
+  let etaService: any ETAService
   let commuteID: CommuteEntry.ID
 
   private enum Endpoint: String, Identifiable {
@@ -19,6 +20,7 @@ struct CommuteDetailView: View {
   @State private var isConfirmingDelete = false
   @State private var draftName = ""
   @State private var errorMessage: String?
+  @State private var isShowingETAs = false
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {
@@ -70,9 +72,11 @@ struct CommuteDetailView: View {
       }
 
       Section {
-        // Wired to ETAService in Phase 3.
-        Button("Show ETAs", systemImage: "clock") {}
-          .disabled(true)
+        Button("Show ETAs", systemImage: "clock") { isShowingETAs = true }
+          .disabled(commute.etaBlocker != nil)
+          .accessibilityIdentifier("show-etas")
+      } footer: {
+        if let blocker = commute.etaBlocker { Text(blocker) }
       }
     }
   }
@@ -80,6 +84,7 @@ struct CommuteDetailView: View {
   /// The picker sheet and the rename/delete/error alerts.
   private func presentations(for commute: Commute, on view: some View) -> some View {
     view
+      .sheet(isPresented: $isShowingETAs) { ETASheet(commute: commute, service: etaService) }
       .sheet(item: $picking) { endpoint in
         PlacePickerView(
           title: endpoint.rawValue,

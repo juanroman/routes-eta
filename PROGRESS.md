@@ -3,7 +3,7 @@
 Tracks where Phase 1 actually is, across sessions. See `prd.md` for the
 requirements this implements. Phase 0 is done (`phase0/results.md`).
 
-## iOS app (`ios/`) — Phases 0–1 done, Phase 2 next
+## iOS app (`ios/`) — Phases 0–3 done on mocks; connecting to `api/` is next
 
 Native SwiftUI MVP: commute/routes editor + a "show ETAs" button, no push
 notifications. Built mock-first (all UI against in-memory services), real
@@ -58,6 +58,25 @@ immediately; Phase 2's editors will add save/discard.
   (use `.global` for `MapProxy.convert`; taps near a handle are ignored by the
   map handler). Preview still comes from the mock (straight lines); real Google
   routes arrive when `api/` is connected.
+
+**Phase 3 (done, this PR):** "Show ETAs" on the commute screen opens a sheet with
+one colored chip per route in config order (minutes, or "?" when that route
+failed; quickest marked "Fastest"; "Updated HH:MM" and Refresh). All routes
+failing shows "Couldn't fetch ETAs" with Try Again. The button is disabled with
+a reason until the commute has origin, destination and a route. Still the mock
+`ETAService` (a route named "...fail..." fails).
+
+**Next (not started): connect the app to `api/`.** The editor still draws
+straight origin-via-destination lines because the mock preview has no roads;
+the real route comes from `POST /preview` (decoded polyline), which
+`RouteMapView` already paints, so only a `URLSession` `RoutePreviewService` (plus
+config and ETA clients) is needed. Decisions to make first:
+- `api/` binds 127.0.0.1 only (prd FR-27): fine for the iOS Simulator
+  (localhost), but a physical phone needs a reachable host plus auth.
+- `POST /run-now` also sends the Pushover notification, so the app's ETA button
+  needs either a new notify-free endpoint or to accept the notification.
+(Considered and rejected: MapKit directions as a stopgap; its roads and via
+semantics differ from Google's, so routes would be tuned against the wrong map.)
 
 ## Status: Phase 1 — done (POC validated by the owner)
 
