@@ -8,7 +8,8 @@
       store: ConfigStore(repository: InMemoryConfigRepository()),
       router: AppRouter(),
       placeSearch: MockPlaceSearchService(),
-      savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()))
+      savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()),
+      routePreview: MockRoutePreviewService())
   }
 
   #Preview("Commutes") { previewRoot() }

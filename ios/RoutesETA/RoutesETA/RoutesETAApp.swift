@@ -31,7 +31,9 @@ struct RoutesETAApp: App {
 
   var body: some Scene {
     WindowGroup {
-      RootView(store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces)
+      RootView(
+        store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
+        routePreview: MockRoutePreviewService())
     }
   }
 }
