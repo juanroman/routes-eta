@@ -6,6 +6,7 @@ struct CommutesListView: View {
 
   @State private var isAdding = false
   @State private var renaming: CommuteEntry.ID?
+  @State private var pendingDelete: CommuteEntry?
   @State private var draftName = ""
   @State private var errorMessage: String?
 
@@ -42,6 +43,18 @@ struct CommutesListView: View {
       }
       Button("Cancel", role: .cancel) {}
     }
+    .alert(
+      "Delete \"\(pendingDelete?.commute.name ?? "")\"?",
+      isPresented: isConfirmingDelete,
+      presenting: pendingDelete
+    ) { entry in
+      Button("Delete Commute", role: .destructive) {
+        submit { await store.deleteCommute(id: entry.id) }
+      }
+      Button("Cancel", role: .cancel) {}
+    } message: { entry in
+      Text(deleteWarning(for: entry.commute))
+    }
     .alert("Couldn't save", isPresented: hasError) {
       Button("OK", role: .cancel) {}
     } message: {
@@ -56,9 +69,7 @@ struct CommutesListView: View {
           CommuteRow(commute: entry.commute)
         }
         .swipeActions {
-          Button("Delete", role: .destructive) {
-            submit { await store.deleteCommute(id: entry.id) }
-          }
+          Button("Delete", role: .destructive) { pendingDelete = entry }
           Button("Rename") {
             draftName = entry.commute.name
             renaming = entry.id
@@ -76,6 +87,16 @@ struct CommutesListView: View {
 
   private var isRenaming: Binding<Bool> {
     Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } })
+  }
+
+  private var isConfirmingDelete: Binding<Bool> {
+    Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
+  }
+
+  private func deleteWarning(for commute: Commute) -> String {
+    let count = commute.routes.count
+    guard count > 0 else { return "This can't be undone." }
+    return "Its \(count) \(count == 1 ? "route" : "routes") and schedule will be deleted too."
   }
 
   private var hasError: Binding<Bool> {
