@@ -16,10 +16,11 @@ let package = Package(
   targets: [
     .target(name: "Domain", swiftSettings: strict),
     .target(name: "Mocks", dependencies: ["Domain"], swiftSettings: strict),
-    .target(name: "Features", dependencies: ["Domain"], swiftSettings: strict),
+    .target(name: "Features", dependencies: ["Domain", "Mocks"], swiftSettings: strict),
     .testTarget(name: "DomainTests", dependencies: ["Domain"], swiftSettings: strict),
-    .testTarget(name: "MocksTests", dependencies: ["Mocks"], swiftSettings: strict),
-    .testTarget(name: "FeaturesTests", dependencies: ["Features"], swiftSettings: strict),
+    .testTarget(name: "MocksTests", dependencies: ["Mocks", "Domain"], swiftSettings: strict),
+    .testTarget(
+      name: "FeaturesTests", dependencies: ["Features", "Domain", "Mocks"], swiftSettings: strict),
   ],
   swiftLanguageModes: [.v6]
 )
