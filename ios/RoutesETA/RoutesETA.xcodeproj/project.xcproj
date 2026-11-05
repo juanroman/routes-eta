@@ -51,6 +51,9 @@
         }, {
           "product-name": "Mocks",
           "build-phase": { "build-phase": "frameworks" },
+        }, {
+          "product-name": "Platform",
+          "build-phase": { "build-phase": "frameworks" },
         },
       ],
       "build-settings": {

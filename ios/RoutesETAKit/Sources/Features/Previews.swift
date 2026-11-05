@@ -7,7 +7,8 @@
     RootView(
       store: ConfigStore(repository: InMemoryConfigRepository()),
       router: AppRouter(),
-      placeSearch: MockPlaceSearchService())
+      placeSearch: MockPlaceSearchService(),
+      savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()))
   }
 
   #Preview("Commutes") { previewRoot() }

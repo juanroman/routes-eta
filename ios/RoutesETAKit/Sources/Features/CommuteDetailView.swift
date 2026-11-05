@@ -4,6 +4,7 @@ import SwiftUI
 struct CommuteDetailView: View {
   let store: ConfigStore
   let placeSearch: any PlaceSearchService
+  let savedPlaces: SavedPlacesStore
   let commuteID: CommuteEntry.ID
 
   private enum Endpoint: String, Identifiable {
@@ -95,7 +96,8 @@ struct CommuteDetailView: View {
         PlacePickerView(
           title: endpoint.rawValue,
           selected: endpoint == .origin ? commute.origin : commute.destination,
-          service: placeSearch
+          service: placeSearch,
+          savedPlaces: savedPlaces
         ) { place in
           save { commute in
             if endpoint == .origin { commute.origin = place } else { commute.destination = place }

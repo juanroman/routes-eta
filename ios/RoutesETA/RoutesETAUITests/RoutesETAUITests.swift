@@ -8,6 +8,7 @@ final class RoutesETAUITests: XCTestCase {
   @MainActor
   func testDrillIntoACommuteAndBack() throws {
     let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
     app.launch()
 
     let commute = app.staticTexts["Work to Home"]
@@ -24,6 +25,7 @@ final class RoutesETAUITests: XCTestCase {
   @MainActor
   func testDeleteAsksForConfirmation() throws {
     let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
     app.launch()
 
     let commute = app.staticTexts["Home to Work"]
@@ -44,21 +46,23 @@ final class RoutesETAUITests: XCTestCase {
   }
 
   @MainActor
-  func testChangeDestinationAndRenameFromDetail() throws {
+  func testSearchForADestinationAndRenameFromDetail() throws {
     let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
     app.launch()
 
     app.staticTexts["Work to Home"].tap()
 
-    // Pick a different destination.
+    // Search like Calendar's Location field, then pick a result.
     app.buttons["endpoint-To"].tap()
-    let place = app.buttons["Polanco"]
-    XCTAssertTrue(place.waitForExistence(timeout: 5))
-    place.tap()
-    let row = app.buttons["endpoint-To"]
-    let updated = expectation(
-      for: NSPredicate(format: "label CONTAINS 'Polanco'"), evaluatedWith: row)
-    wait(for: [updated], timeout: 5)
+    let search = app.searchFields.firstMatch
+    XCTAssertTrue(search.waitForExistence(timeout: 5))
+    search.tap()
+    search.typeText("Pola")
+    let result = app.buttons["place-Polanco"]
+    XCTAssertTrue(result.waitForExistence(timeout: 5))
+    result.tap()
+    waitForLabel(of: app.buttons["endpoint-To"], toContain: "Polanco")
 
     // Rename via the menu.
     app.buttons["More"].tap()
@@ -68,6 +72,40 @@ final class RoutesETAUITests: XCTestCase {
     field.clearAndType("Evening")
     app.alerts.buttons["Rename"].tap()
     XCTAssertTrue(app.navigationBars["Evening"].waitForExistence(timeout: 5))
+  }
+
+  @MainActor
+  func testHomeShortcutIsSetOnceThenReused() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Work to Home"].tap()
+
+    // First use: Home is unset, so tapping it asks for an address.
+    app.buttons["endpoint-From"].tap()
+    app.buttons["shortcut-Home"].tap()
+    let search = app.searchFields.firstMatch
+    search.tap()
+    search.typeText("Sat")
+    app.buttons["place-Satélite"].tap()
+    waitForLabel(of: app.buttons["endpoint-From"], toContain: "Home")
+
+    // Second use: the shortcut now fills the field directly, no search.
+    app.buttons["endpoint-To"].tap()
+    XCTAssertTrue(app.buttons["shortcut-Home"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["shortcut-Home"].label.contains("Mexico City"))
+    app.buttons["shortcut-Home"].tap()
+    waitForLabel(of: app.buttons["endpoint-To"], toContain: "Home")
+  }
+
+  private func waitForLabel(
+    of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    let predicate = NSPredicate(format: "label CONTAINS %@", text)
+    let result = XCTWaiter().wait(
+      for: [expectation(for: predicate, evaluatedWith: element)], timeout: 5)
+    XCTAssertEqual(result, .completed, file: file, line: line)
   }
 }
 

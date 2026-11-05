@@ -1,18 +1,37 @@
 import Domain
 import Features
 import Mocks
+import Platform
 import SwiftUI
 
 @main
 struct RoutesETAApp: App {
-  // Phase 1-3 run entirely on in-memory mocks; real API clients replace these
-  // here (the only place that knows the concrete types) in a later phase.
-  @State private var store = ConfigStore(repository: InMemoryConfigRepository())
+  @State private var store: ConfigStore
+  @State private var savedPlaces: SavedPlacesStore
   @State private var router = AppRouter()
+  private let placeSearch: any PlaceSearchService
+
+  /// The commute config still runs on in-memory mocks (real API client comes in a
+  /// later phase); place search and Home/Work use the real MapKit/UserDefaults
+  /// services, except under UI tests (`-mock-services`), which must be offline
+  /// and start from a clean slate.
+  init() {
+    let useMocks = CommandLine.arguments.contains("-mock-services")
+    _store = State(initialValue: ConfigStore(repository: InMemoryConfigRepository()))
+    if useMocks {
+      placeSearch = MockPlaceSearchService()
+      _savedPlaces = State(
+        initialValue: SavedPlacesStore(repository: InMemorySavedPlacesRepository()))
+    } else {
+      placeSearch = MapKitPlaceSearchService()
+      _savedPlaces = State(
+        initialValue: SavedPlacesStore(repository: UserDefaultsSavedPlacesRepository()))
+    }
+  }
 
   var body: some Scene {
     WindowGroup {
-      RootView(store: store, router: router, placeSearch: MockPlaceSearchService())
+      RootView(store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces)
     }
   }
 }
