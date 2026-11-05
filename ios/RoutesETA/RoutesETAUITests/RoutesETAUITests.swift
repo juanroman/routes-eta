@@ -131,6 +131,40 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertTrue(row.waitForNonExistence(timeout: 5))
   }
 
+  @MainActor
+  func testScheduleChipsRespectOtherRulesAndRulesCanBeAddedAndDeleted() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Home to Work"].tap()
+    app.staticTexts["Mon · 06:30"].tap()
+
+    // "Home to Work" has Mon (rule 1) and Tue-Fri (rule 2): rule 1 can't take Tue,
+    // and Mon can't be switched off because it is rule 1's only day.
+    XCTAssertFalse(app.buttons["day-0-Tue"].isEnabled)
+    XCTAssertFalse(app.buttons["day-0-Mon"].isEnabled)
+    XCTAssertTrue(app.buttons["day-0-Sat"].isEnabled)
+
+    // Sat and Sun are free, so a third rule can be added and gets Sat.
+    app.buttons["day-0-Sat"].tap()
+    XCTAssertTrue(app.buttons["day-0-Mon"].isEnabled)  // now has two days
+    app.buttons["day-0-Sat"].tap()  // back off
+
+    app.buttons["add-rule"].tap()
+    XCTAssertTrue(app.buttons["day-2-Sat"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["day-2-Sat"].isSelected)
+    XCTAssertFalse(app.buttons["day-2-Mon"].isEnabled)
+
+    // Delete it, with confirmation.
+    app.buttons.matching(identifier: "Delete Rule").element(boundBy: 2).tap()
+    XCTAssertTrue(app.alerts.buttons["Delete Rule"].waitForExistence(timeout: 5))
+    app.alerts.buttons["Cancel"].tap()
+    XCTAssertTrue(app.buttons["day-2-Sat"].exists)
+    app.buttons.matching(identifier: "Delete Rule").element(boundBy: 2).tap()
+    app.alerts.buttons["Delete Rule"].tap()
+    XCTAssertTrue(app.buttons["day-2-Sat"].waitForNonExistence(timeout: 5))
+  }
+
   private func waitForLabel(
     of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
     line: UInt = #line

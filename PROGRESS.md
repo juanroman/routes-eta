@@ -44,7 +44,11 @@ immediately; Phase 2's editors will add save/discard.
   in the next palette color, like the web builder), rename + color in a route
   editor, swipe-delete with confirmation, reorder via Edit. Routes are addressed
   by index in navigation since the editor renames them.
-- 2c schedule editor, 2d MapKit via-point editor (riskiest; spike
+- 2c schedule editor (this PR): per-rule weekday chips and a time picker; chips
+  owned by another rule are disabled and a rule's last day can't be switched off,
+  so overlap/empty rules can't be created (the store still validates);
+  add/delete rule (delete confirmed); timezone shown as a footer.
+-  2d MapKit via-point editor (riskiest; spike
   tap-on-line and drag first).
 
 ## Status: Phase 1 — done (POC validated by the owner)
