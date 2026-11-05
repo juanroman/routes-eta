@@ -42,4 +42,39 @@ final class RoutesETAUITests: XCTestCase {
     app.buttons["Delete Commute"].tap()
     XCTAssertTrue(commute.waitForNonExistence(timeout: 5))
   }
+
+  @MainActor
+  func testChangeDestinationAndRenameFromDetail() throws {
+    let app = XCUIApplication()
+    app.launch()
+
+    app.staticTexts["Work to Home"].tap()
+
+    // Pick a different destination.
+    app.buttons["endpoint-To"].tap()
+    let place = app.buttons["Polanco"]
+    XCTAssertTrue(place.waitForExistence(timeout: 5))
+    place.tap()
+    let row = app.buttons["endpoint-To"]
+    let updated = expectation(
+      for: NSPredicate(format: "label CONTAINS 'Polanco'"), evaluatedWith: row)
+    wait(for: [updated], timeout: 5)
+
+    // Rename via the menu.
+    app.buttons["More"].tap()
+    app.buttons["Rename"].tap()
+    let field = app.alerts.textFields["Name"]
+    XCTAssertTrue(field.waitForExistence(timeout: 5))
+    field.clearAndType("Evening")
+    app.alerts.buttons["Rename"].tap()
+    XCTAssertTrue(app.navigationBars["Evening"].waitForExistence(timeout: 5))
+  }
+}
+
+extension XCUIElement {
+  func clearAndType(_ text: String) {
+    tap()
+    let current = (value as? String) ?? ""
+    typeText(String(repeating: XCUIKeyboardKey.delete.rawValue, count: current.count) + text)
+  }
 }

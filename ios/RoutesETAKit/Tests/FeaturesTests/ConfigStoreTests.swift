@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Mocks
 import Testing
 
@@ -64,5 +65,61 @@ struct ConfigStoreTests {
     let store = ConfigStore(repository: Broken())
     await store.load()
     #expect(store.loadState == .failed("Couldn't load your commutes."))
+  }
+}
+
+@MainActor
+struct ConfigStoreUpdateTests {
+  @Test func updateChangesOneCommuteAndPersists() async throws {
+    let repository = InMemoryConfigRepository()
+    let store = ConfigStore(repository: repository)
+    await store.load()
+    let id = try #require(store.entries.first?.id)
+
+    #expect(await store.updateCommute(id: id) { $0.origin = SampleData.home } == nil)
+    #expect(store.entry(id: id)?.commute.origin == SampleData.home)
+    #expect(try await repository.load().commutes.first?.origin == SampleData.home)
+  }
+
+  @Test func updateThatBreaksValidationIsRejectedAndNotApplied() async throws {
+    let store = ConfigStore(repository: InMemoryConfigRepository())
+    await store.load()
+    let id = try #require(store.entries.first?.id)
+    let before = store.entry(id: id)
+
+    #expect(await store.updateCommute(id: id) { $0.name = "Home to Work" } != nil)
+    #expect(store.entry(id: id) == before)
+  }
+
+  @Test func updatingAnUnknownCommuteIsANoOp() async {
+    let store = ConfigStore(repository: InMemoryConfigRepository())
+    await store.load()
+    #expect(await store.updateCommute(id: UUID()) { $0.name = "X" } == nil)
+    #expect(store.entries.count == 2)
+  }
+}
+
+@MainActor
+struct PlacePickerModelTests {
+  @Test func emptyQueryListsSuggestions() async {
+    let model = PlacePickerModel(service: MockPlaceSearchService())
+    await model.update(query: "")
+    #expect(model.results == MockPlaceSearchService.places)
+  }
+
+  @Test func queryFiltersIgnoringCaseAndAccents() async {
+    let model = PlacePickerModel(service: MockPlaceSearchService())
+    await model.update(query: "satelite")
+    #expect(model.results.map(\.label) == ["Satélite"])
+  }
+
+  @Test func searchFailureIsReported() async {
+    struct Broken: PlaceSearchService {
+      func search(query: String) async throws -> [NamedPoint] { throw CancellationError() }
+    }
+    let model = PlacePickerModel(service: Broken())
+    await model.update(query: "x")
+    #expect(model.failed)
+    #expect(model.results.isEmpty)
   }
 }

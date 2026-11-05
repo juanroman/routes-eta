@@ -58,3 +58,10 @@ public enum ETAServiceError: Error, Equatable, Sendable {
 public protocol ETAService: Sendable {
   func run(commute: String) async throws -> ETAReport
 }
+
+/// Finds places to use as a commute's origin or destination. The real
+/// implementation (MapKit local search or the API) comes in a later phase.
+public protocol PlaceSearchService: Sendable {
+  /// An empty query returns a default set of suggestions.
+  func search(query: String) async throws -> [NamedPoint]
+}

@@ -12,7 +12,7 @@ struct RoutesETAApp: App {
 
   var body: some Scene {
     WindowGroup {
-      RootView(store: store, router: router)
+      RootView(store: store, router: router, placeSearch: MockPlaceSearchService())
     }
   }
 }

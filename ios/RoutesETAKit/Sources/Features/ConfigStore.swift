@@ -52,9 +52,18 @@ public final class ConfigStore {
 
   @discardableResult
   public func renameCommute(id: CommuteEntry.ID, to name: String) async -> String? {
+    await updateCommute(id: id) { $0.name = name.trimmingCharacters(in: .whitespaces) }
+  }
+
+  /// Applies `mutate` to one commute, validating and persisting the result.
+  /// The single write path for the editors, so every edit gets the same checks.
+  @discardableResult
+  public func updateCommute(
+    id: CommuteEntry.ID, _ mutate: (inout Commute) -> Void
+  ) async -> String? {
     guard let index = entries.firstIndex(where: { $0.id == id }) else { return nil }
     var updated = entries
-    updated[index].commute.name = name.trimmingCharacters(in: .whitespaces)
+    mutate(&updated[index].commute)
     return await apply(updated)
   }
 

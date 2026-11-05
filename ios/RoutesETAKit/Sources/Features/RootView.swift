@@ -5,9 +5,11 @@ import SwiftUI
 public struct RootView: View {
   @Bindable private var router: AppRouter
   private let store: ConfigStore
+  private let placeSearch: any PlaceSearchService
 
-  public init(store: ConfigStore, router: AppRouter) {
+  public init(store: ConfigStore, router: AppRouter, placeSearch: any PlaceSearchService) {
     self.store = store
+    self.placeSearch = placeSearch
     self.router = router
   }
 
@@ -17,7 +19,7 @@ public struct RootView: View {
         .navigationDestination(for: AppRoute.self) { route in
           switch route {
           case .commute(let id):
-            CommuteDetailView(store: store, commuteID: id)
+            CommuteDetailView(store: store, placeSearch: placeSearch, commuteID: id)
           case .routeEditor(let commuteID, let routeName):
             RouteEditorPlaceholderView(store: store, commuteID: commuteID, routeName: routeName)
           case .scheduleEditor(let commuteID):
