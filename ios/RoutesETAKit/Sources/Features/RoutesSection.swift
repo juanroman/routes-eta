@@ -9,8 +9,10 @@ struct RoutesSection: View {
   let commuteID: CommuteEntry.ID
   let routes: [RouteDef]
 
-  @State private var pendingDelete: Int?
-  @State private var errorMessage: String?
+  /// Owned by the commute screen, which presents the delete confirmation and error
+  /// alerts: alerts attached to a `Section` inside a `List` proved unreliable.
+  @Binding var pendingDelete: Int?
+  @Binding var errorMessage: String?
 
   var body: some View {
     Section("Routes") {
@@ -38,22 +40,6 @@ struct RoutesSection: View {
       Button("Add Route", systemImage: "plus") { Task { await add() } }
         .accessibilityIdentifier("add-route")
     }
-    .alert(
-      "Delete \"\(pendingName)\"?", isPresented: isConfirming,
-      presenting: pendingDelete
-    ) { index in
-      Button("Delete Route", role: .destructive) {
-        Task { errorMessage = await store.deleteRoute(in: commuteID, at: index) }
-      }
-      Button("Cancel", role: .cancel) {}
-    } message: { index in
-      Text(routes.indices.contains(index) ? routes[index].deletionWarning : "")
-    }
-    .alert("Couldn't save", isPresented: hasError) {
-      Button("OK", role: .cancel) {}
-    } message: {
-      Text(errorMessage ?? "")
-    }
   }
 
   private func add() async {
@@ -65,16 +51,4 @@ struct RoutesSection: View {
     }
   }
 
-  private var pendingName: String {
-    guard let index = pendingDelete, routes.indices.contains(index) else { return "" }
-    return routes[index].name
-  }
-
-  private var isConfirming: Binding<Bool> {
-    Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } })
-  }
-
-  private var hasError: Binding<Bool> {
-    Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })
-  }
 }

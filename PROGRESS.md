@@ -78,6 +78,18 @@ config and ETA clients) is needed. Decisions to make first:
 (Considered and rejected: MapKit directions as a stopgap; its roads and via
 semantics differ from Google's, so routes would be tuned against the wrong map.)
 
+**Direction change (standalone app):** the Pushover notifications are no longer
+needed (the owner checks ETAs on the phone), so the app will call Google's Routes
+API itself instead of going through `api/`; `api/` and `web/` stay as they are
+for the Pi/web workflow and are not kept in sync. Plan: Phase 4 on-device
+persistence (+ hide schedules), Phase 5 Google key plumbing via a git-ignored
+xcconfig (the repo is public), Phase 6 the Google client (preview polyline +
+traffic-aware ETAs, ported from `api/app/google_routes_client.py`).
+**Phase 4 (this PR):** commutes are saved to `Application Support/RoutesETA/config.json`
+(same JSON shape as the API config; atomic writes; a corrupt file fails to load
+visibly instead of looking empty). The schedule editor is hidden by default (the
+data is kept); `-show-schedules` reveals it. Route/ETA previews are still mocks.
+
 ## Status: Phase 1 — done (POC validated by the owner)
 
 Re-evaluated against prd.md §12's actual exit criteria. Update: the owner

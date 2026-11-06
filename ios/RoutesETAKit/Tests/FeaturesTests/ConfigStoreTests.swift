@@ -236,3 +236,23 @@ struct RouteEditingStoreTests {
     #expect(store.entry(id: id)?.commute.routes == before.reversed())
   }
 }
+
+@MainActor
+struct ConfigStoreWriteFailureTests {
+  struct FailingSave: ConfigRepository {
+    func load() async throws -> Config { SampleData.config }
+    func save(_ config: Config) async throws { throw CocoaError(.fileWriteOutOfSpace) }
+  }
+
+  @Test func aFailedWriteLeavesTheVisibleStateUntouched() async throws {
+    let store = ConfigStore(repository: FailingSave())
+    await store.load()
+    let before = store.entries
+
+    #expect(await store.addCommute(named: "Gym") == "Couldn't save your changes.")
+    let id = try #require(before.first?.id)
+    #expect(await store.renameCommute(id: id, to: "Evening") != nil)
+    #expect(await store.deleteCommute(id: id) != nil)
+    #expect(store.entries == before)
+  }
+}
