@@ -23,3 +23,17 @@ struct ReorderButton: View {
     #endif
   }
 }
+
+extension View {
+  /// Full-screen cover on iOS; a sheet on the macOS test host, where
+  /// `fullScreenCover` doesn't exist.
+  func fullScreenCoverOnIOS<Content: View>(
+    isPresented: Binding<Bool>, @ViewBuilder content: @escaping () -> Content
+  ) -> some View {
+    #if os(iOS)
+      fullScreenCover(isPresented: isPresented, content: content)
+    #else
+      sheet(isPresented: isPresented, content: content)
+    #endif
+  }
+}

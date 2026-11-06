@@ -114,6 +114,12 @@ network); `GoogleLiveSmokeTests` is opt-in (see `ios/README.md`). Known gap, sam
 as the web builder (prd FR-9, never implemented): via points are not snapped to
 the nearest road, so a point dropped off-road makes the route detour to it.
 
+**Full-screen map (follow-up):** the inline map was too small for precise editing, so
+the route editor's map has an expand button (top-right) that opens it edge to edge
+with the same editing (tap the line to add a via point, drag to move, tap a handle
+and Remove) and a bottom bar with the via count. Pan/zoom are shared between the
+inline and full-screen copies, and both edit the same data.
+
 ## Status: Phase 1 — done (POC validated by the owner)
 
 Re-evaluated against prd.md §12's actual exit criteria. Update: the owner

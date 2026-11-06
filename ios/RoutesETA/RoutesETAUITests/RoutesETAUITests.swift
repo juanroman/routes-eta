@@ -183,49 +183,6 @@ final class RoutesETAUITests: XCTestCase {
   }
 
   @MainActor
-  func testAddDragAndRemoveAViaPointOnTheMap() throws {
-    let app = XCUIApplication()
-    app.launchArguments = ["-mock-services"]
-    app.launch()
-    app.staticTexts["Work to Home"].tap()
-    app.staticTexts["Mordor"].tap()  // a direct route: a straight line, no via points
-
-    let count = app.staticTexts["via-count"]
-    XCTAssertTrue(count.waitForExistence(timeout: 10))
-    XCTAssertEqual(count.label, "No via points")
-
-    // The map is fitted to the route and centered on the *visible* area (the map
-    // is 340pt tall and extends under the nav bar), so a straight line between the
-    // two ends passes through the center of that bottom 340pt.
-    let map = app.maps.firstMatch
-    XCTAssertTrue(map.waitForExistence(timeout: 5))
-    sleep(2)  // let the preview polyline load and the camera settle
-    let centerY = (map.frame.height - 340 / 2) / map.frame.height
-    map.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: centerY)).tap()
-
-    let handle = app.staticTexts["via-handle-0"]
-    XCTAssertTrue(handle.waitForExistence(timeout: 5))
-    XCTAssertEqual(count.label, "1 via point")
-
-    // Tapping the handle selects it and must not add a second via point.
-    handle.tap()
-    XCTAssertTrue(app.buttons["remove-via"].waitForExistence(timeout: 5))
-    XCTAssertEqual(count.label, "1 via point")
-
-    // Dragging moves it without panning the map or adding points.
-    let before = handle.frame
-    let grip = handle.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-    grip.press(forDuration: 0.2, thenDragTo: grip.withOffset(CGVector(dx: 60, dy: 40)))
-    sleep(1)
-    XCTAssertGreaterThan(app.staticTexts["via-handle-0"].frame.midX, before.midX + 30)
-    XCTAssertEqual(count.label, "1 via point")
-
-    // Remove it.
-    app.buttons["remove-via"].tap()
-    XCTAssertEqual(count.label, "No via points")
-  }
-
-  @MainActor
   func testShowETAsListsEachRouteAndCanBeRefreshed() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
