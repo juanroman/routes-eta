@@ -3,3 +3,6 @@ DerivedData/
 xcuserdata/
 *.xcuserstate
 .swiftpm/
+
+# Google Routes API key (the repo is public; never commit this). See README.
+RoutesETA/RoutesETA/Secrets.plist

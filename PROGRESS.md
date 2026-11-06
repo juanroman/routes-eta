@@ -85,10 +85,19 @@ for the Pi/web workflow and are not kept in sync. Plan: Phase 4 on-device
 persistence (+ hide schedules), Phase 5 Google key plumbing via a git-ignored
 xcconfig (the repo is public), Phase 6 the Google client (preview polyline +
 traffic-aware ETAs, ported from `api/app/google_routes_client.py`).
-**Phase 4 (this PR):** commutes are saved to `Application Support/RoutesETA/config.json`
+**Phase 4 (done):** commutes are saved to `Application Support/RoutesETA/config.json`
 (same JSON shape as the API config; atomic writes; a corrupt file fails to load
 visibly instead of looking empty). The schedule editor is hidden by default (the
 data is kept); `-show-schedules` reveals it. Route/ETA previews are still mocks.
+
+**Phase 5 (this PR):** the Google key comes from a git-ignored
+`ios/RoutesETA/RoutesETA/Secrets.plist` (template: `ios/Secrets.example.plist`).
+Deviation from the plan: not an xcconfig. A spike showed that any file in the app
+folder is bundled automatically (the app target uses a synchronized folder), so a
+plist needs no project-file edits, works the same in Xcode and `xcodebuild`, and a
+clean clone still builds. `Platform.GoogleAPIKey` reads it and reports a helpful
+error when it is missing/empty/the template value; `ios/check.sh` fails if the file
+is ever tracked. The key is not used yet (Phase 6).
 
 ## Status: Phase 1 — done (POC validated by the owner)
 
