@@ -23,7 +23,7 @@ let package = Package(
     .testTarget(name: "DomainTests", dependencies: ["Domain"], swiftSettings: strict),
     .testTarget(name: "MocksTests", dependencies: ["Mocks", "Domain"], swiftSettings: strict),
     .testTarget(
-      name: "PlatformTests", dependencies: ["Platform", "Domain"], swiftSettings: strict),
+      name: "PlatformTests", dependencies: ["Platform", "Domain", "Mocks"], swiftSettings: strict),
     .testTarget(
       name: "FeaturesTests", dependencies: ["Features", "Domain", "Mocks"], swiftSettings: strict),
   ],

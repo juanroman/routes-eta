@@ -53,6 +53,8 @@ public struct ETAReport: Hashable, Sendable {
 
 public enum ETAServiceError: Error, Equatable, Sendable {
   case unknownCommute(String)
+  /// Missing origin, destination or routes; see `Commute.etaBlocker`.
+  case notReady(String)
 }
 
 public protocol ETAService: Sendable {

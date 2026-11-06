@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Observation
 
 /// Holds the drawn polyline for the route being edited. Previews are fetched
@@ -18,6 +19,8 @@ final class RouteMapModel {
   private(set) var polyline: [LatLng] = []
   private(set) var distanceMeters: Int?
   private(set) var status: Status = .idle
+  /// Why the last request failed, in words for the user; nil unless `status == .failed`.
+  private(set) var failureMessage: String?
   private let service: any RoutePreviewService
 
   init(service: any RoutePreviewService) {
@@ -28,6 +31,7 @@ final class RouteMapModel {
   /// so the map doesn't flash empty after every edit.
   func load(origin: LatLng, destination: LatLng, via: [LatLng]) async {
     status = .loading
+    failureMessage = nil
     do {
       let preview = try await service.preview(origin: origin, destination: destination, via: via)
       guard !Task.isCancelled else { return }
@@ -39,6 +43,7 @@ final class RouteMapModel {
     } catch {
       guard !Task.isCancelled else { return }
       status = .failed
+      failureMessage = (error as? LocalizedError)?.errorDescription
     }
   }
 }

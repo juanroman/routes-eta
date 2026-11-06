@@ -36,7 +36,7 @@ struct ETASheet: View {
       failure(message)
     case .loaded(let report, let fetchedAt):
       if report.allFailed {
-        failure("Couldn't fetch ETAs.")
+        failure("Couldn't fetch ETAs.", detail: report.results.compactMap(\.error).first)
       } else {
         results(report, fetchedAt: fetchedAt)
       }
@@ -79,9 +79,11 @@ struct ETASheet: View {
     .accessibilityIdentifier("eta-\(result.name)")
   }
 
-  private func failure(_ message: String) -> some View {
+  private func failure(_ message: String, detail: String? = nil) -> some View {
     ContentUnavailableView {
       Label(message, systemImage: "exclamationmark.triangle")
+    } description: {
+      if let detail { Text(detail) }
     } actions: {
       Button("Try Again") { Task { await model.load() } }
         .accessibilityIdentifier("eta-retry")

@@ -1,4 +1,5 @@
 import Domain
+import Foundation
 import Mocks
 import Testing
 
@@ -77,5 +78,30 @@ struct ETAModelTests {
       Config(commutes: [Commute(name: "C", routes: [RouteDef(name: "R", color: "#000000")])]))
     await model.load()
     if case .loaded = model.state {} else { Issue.record("expected loaded after retry") }
+  }
+}
+
+@MainActor
+struct ETAFailureMessageTests {
+  struct Explaining: LocalizedError {
+    var errorDescription: String? { "Add your Google API key." }
+  }
+
+  struct Failing: ETAService {
+    let error: any Error
+    func run(commute: String) async throws -> ETAReport { throw error }
+  }
+
+  @Test func actionableErrorsReachTheSheet() async {
+    let model = ETAModel(service: Failing(error: Explaining()), commuteName: "C")
+    await model.load()
+    #expect(model.state == .failed("Add your Google API key."))
+  }
+
+  @Test func otherErrorsGetTheGenericMessage() async {
+    let model = ETAModel(
+      service: Failing(error: ETAServiceError.unknownCommute("C")), commuteName: "C")
+    await model.load()
+    #expect(model.state == .failed("Couldn't fetch ETAs."))
   }
 }

@@ -33,7 +33,9 @@ final class ETAModel {
       return
     } catch {
       guard !Task.isCancelled else { return }
-      state = .failed("Couldn't fetch ETAs.")
+      // Our own errors (missing key, offline, Google rejecting the request) carry a
+      // message the user can act on; anything else gets the generic one.
+      state = .failed((error as? LocalizedError)?.errorDescription ?? "Couldn't fetch ETAs.")
     }
   }
 }

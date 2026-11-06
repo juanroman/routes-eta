@@ -114,12 +114,17 @@ struct RouteEditorView: View {
     case .loading:
       ProgressView().padding(8).background(.regularMaterial, in: Capsule()).padding(8)
     case .failed:
-      HStack {
-        Text("Couldn't draw the route")
+      VStack(spacing: 6) {
+        Text(model.failureMessage ?? "Couldn't draw the route")
+          .font(.footnote)
+          .multilineTextAlignment(.center)
+          .lineLimit(4)
         Button("Retry") { retry() }
+          .font(.subheadline.bold())
       }
-      .font(.subheadline)
-      .padding(8).background(.regularMaterial, in: Capsule()).padding(8)
+      .padding(10)
+      .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
+      .padding(8)
     case .idle, .loaded:
       EmptyView()
     }

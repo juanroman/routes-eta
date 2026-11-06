@@ -3,7 +3,7 @@
 Tracks where Phase 1 actually is, across sessions. See `prd.md` for the
 requirements this implements. Phase 0 is done (`phase0/results.md`).
 
-## iOS app (`ios/`) — Phases 0–3 done on mocks; connecting to `api/` is next
+## iOS app (`ios/`) — standalone MVP, talks to Google directly
 
 Native SwiftUI MVP: commute/routes editor + a "show ETAs" button, no push
 notifications. Built mock-first (all UI against in-memory services), real
@@ -97,7 +97,22 @@ folder is bundled automatically (the app target uses a synchronized folder), so 
 plist needs no project-file edits, works the same in Xcode and `xcodebuild`, and a
 clean clone still builds. `Platform.GoogleAPIKey` reads it and reports a helpful
 error when it is missing/empty/the template value; `ios/check.sh` fails if the file
-is ever tracked. The key is not used yet (Phase 6).
+is ever tracked. 
+
+**Phase 6 (this PR):** the app now gets real route lines and ETAs straight from
+Google. `Platform.GoogleRoutesClient` ports `api/app/google_routes_client.py`
+(plain REST, field masks, `via: true` intermediates, `TRAFFIC_AWARE` duration);
+`GoogleRoutePreviewService` feeds the map (polyline decoded by
+`Domain.PolylineCodec`, a port of `api/app/polyline.py`) and `GoogleETAService`
+runs one request per route concurrently (a failing route never sinks the others;
+minutes round half-to-even like Python's `round`; a missing key is reported once
+up front). Errors carry actionable messages (missing key, offline, 403 key
+restrictions, 429 quota) into the editor banner and ETA sheet. Verified live with
+the real key: the editor draws a road-following route through the via point and
+Show ETAs returned traffic-aware minutes. Tests use a `URLProtocol` stub (no
+network); `GoogleLiveSmokeTests` is opt-in (see `ios/README.md`). Known gap, same
+as the web builder (prd FR-9, never implemented): via points are not snapped to
+the nearest road, so a point dropped off-road makes the route detour to it.
 
 ## Status: Phase 1 — done (POC validated by the owner)
 
