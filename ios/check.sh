@@ -8,6 +8,16 @@ SIM_NAME="${SIM_NAME:-iPhone 18 Pro}"
 SIM_OS="${SIM_OS:-27.2}" # several runtimes are installed; the name alone is ambiguous
 SWIFT_DIRS=(RoutesETAKit/Sources RoutesETAKit/Tests RoutesETA/RoutesETA RoutesETA/RoutesETATests RoutesETA/RoutesETAUITests)
 
+echo "--- secrets are not tracked ---"
+if git ls-files --error-unmatch RoutesETA/RoutesETA/Secrets.plist >/dev/null 2>&1; then
+  echo "RoutesETA/RoutesETA/Secrets.plist is tracked by git; it holds the API key (repo is public)" >&2
+  exit 1
+fi
+git check-ignore -q RoutesETA/RoutesETA/Secrets.plist || {
+  echo "Secrets.plist is not git-ignored" >&2
+  exit 1
+}
+
 echo "--- swift-format (lint, strict) ---"
 xcrun swift-format lint --strict --recursive "${SWIFT_DIRS[@]}"
 
