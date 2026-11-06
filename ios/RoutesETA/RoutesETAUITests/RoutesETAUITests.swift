@@ -128,7 +128,8 @@ final class RoutesETAUITests: XCTestCase {
     app.alerts.buttons["Cancel"].tap()
     XCTAssertTrue(row.exists)
 
-    row.swipeLeft()
+    // After Cancel the row may still be swiped open; only swipe if it isn't.
+    if !app.buttons["Delete"].exists { row.swipeLeft() }
     app.buttons["Delete"].tap()
     XCTAssertTrue(app.alerts.buttons["Delete Route"].waitForExistence(timeout: 5))
     app.alerts.buttons["Delete Route"].tap()
@@ -136,9 +137,21 @@ final class RoutesETAUITests: XCTestCase {
   }
 
   @MainActor
-  func testScheduleChipsRespectOtherRulesAndRulesCanBeAddedAndDeleted() throws {
+  func testScheduleSectionIsHiddenByDefault() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Home to Work"].tap()
+
+    XCTAssertTrue(app.buttons["show-etas"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.staticTexts["Mon · 06:30"].exists)
+    XCTAssertFalse(app.staticTexts["Schedule"].exists)
+  }
+
+  @MainActor
+  func testScheduleChipsRespectOtherRulesAndRulesCanBeAddedAndDeleted() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services", "-show-schedules"]
     app.launch()
     app.staticTexts["Home to Work"].tap()
     app.staticTexts["Mon · 06:30"].tap()

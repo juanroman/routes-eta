@@ -7,6 +7,9 @@ struct CommuteDetailView: View {
   let placeSearch: any PlaceSearchService
   let savedPlaces: SavedPlacesStore
   let etaService: any ETAService
+  /// Schedules only fed the Pi's cron notifications; the standalone app hides them
+  /// (the data is kept in the config) until something in the app uses them.
+  let showsSchedules: Bool
   let commuteID: CommuteEntry.ID
 
   private enum Endpoint: String, Identifiable {
@@ -21,6 +24,7 @@ struct CommuteDetailView: View {
   @State private var draftName = ""
   @State private var errorMessage: String?
   @State private var isShowingETAs = false
+  @State private var pendingRouteDelete: Int?
   @Environment(\.dismiss) private var dismiss
 
   var body: some View {
@@ -58,14 +62,18 @@ struct CommuteDetailView: View {
         endpointRow(.destination, point: commute.destination)
       }
 
-      RoutesSection(store: store, router: router, commuteID: commuteID, routes: commute.routes)
+      RoutesSection(
+        store: store, router: router, commuteID: commuteID, routes: commute.routes,
+        pendingDelete: $pendingRouteDelete, errorMessage: $errorMessage)
 
-      Section("Schedule") {
-        NavigationLink(value: AppRoute.scheduleEditor(commute: commuteID)) {
-          VStack(alignment: .leading, spacing: 2) {
-            ForEach(commute.schedules, id: \.self) { Text($0.summary) }
-            if commute.schedules.isEmpty {
-              Text("Not scheduled").foregroundStyle(.secondary)
+      if showsSchedules {
+        Section("Schedule") {
+          NavigationLink(value: AppRoute.scheduleEditor(commute: commuteID)) {
+            VStack(alignment: .leading, spacing: 2) {
+              ForEach(commute.schedules, id: \.self) { Text($0.summary) }
+              if commute.schedules.isEmpty {
+                Text("Not scheduled").foregroundStyle(.secondary)
+              }
             }
           }
         }
@@ -113,6 +121,17 @@ struct CommuteDetailView: View {
       } message: {
         Text(commute.deletionWarning)
       }
+      .alert(
+        "Delete \"\(routeName(at: pendingRouteDelete, in: commute))\"?",
+        isPresented: isConfirmingRouteDelete, presenting: pendingRouteDelete
+      ) { index in
+        Button("Delete Route", role: .destructive) {
+          Task { errorMessage = await store.deleteRoute(in: commuteID, at: index) }
+        }
+        Button("Cancel", role: .cancel) {}
+      } message: { index in
+        Text(commute.routes.indices.contains(index) ? commute.routes[index].deletionWarning : "")
+      }
       .alert("Couldn't save", isPresented: hasError) {
         Button("OK", role: .cancel) {}
       } message: {
@@ -130,6 +149,15 @@ struct CommuteDetailView: View {
     }
     .accessibilityIdentifier("endpoint-\(endpoint.rawValue)")
     .foregroundStyle(.primary)
+  }
+
+  private func routeName(at index: Int?, in commute: Commute) -> String {
+    guard let index, commute.routes.indices.contains(index) else { return "" }
+    return commute.routes[index].name
+  }
+
+  private var isConfirmingRouteDelete: Binding<Bool> {
+    Binding(get: { pendingRouteDelete != nil }, set: { if !$0 { pendingRouteDelete = nil } })
   }
 
   private var hasError: Binding<Bool> {
