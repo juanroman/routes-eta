@@ -19,15 +19,7 @@ public struct MockETAService: ETAService {
     guard let commute = config.commutes.first(where: { $0.name == name }) else {
       throw ETAServiceError.unknownCommute(name)
     }
-    let results = commute.routes.map(Self.eta(for:))
-    let message: String
-    if results.allSatisfy({ $0.minutes == nil }) {
-      message = "\(name): Couldn't fetch ETAs"
-    } else {
-      let parts = results.map { "\($0.name) \($0.minutes.map(String.init) ?? "?")" }
-      message = "\(name): " + parts.joined(separator: " · ")
-    }
-    return ETAReport(commute: name, message: message, results: results)
+    return ETAReport(commute: name, results: commute.routes.map(Self.eta(for:)))
   }
 
   static func eta(for route: RouteDef) -> RouteETA {

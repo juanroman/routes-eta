@@ -12,10 +12,12 @@ struct RoutesETAApp: App {
   @State private var router = AppRouter()
   private let placeSearch: any PlaceSearchService
   private let etaService: any ETAService
+  private let routePreview: any RoutePreviewService
   private let showsSchedules: Bool
 
-  /// Commutes are saved on the device (a JSON file) and place search is MapKit.
-  /// Route previews and ETAs are still mocks until the Google client lands.
+  /// Standalone app: commutes are saved on the device (a JSON file), place search
+  /// is MapKit, and route lines and ETAs come straight from Google's Routes API
+  /// (the key is read from the git-ignored `Secrets.plist`; see `ios/README.md`).
   /// `-mock-services` (UI tests) swaps everything for offline, in-memory, seeded
   /// doubles so each run starts from a clean slate. `-show-schedules` reveals the
   /// schedule editor, which is hidden by default (see `CommuteDetailView`).
@@ -27,8 +29,16 @@ struct RoutesETAApp: App {
     let configRepository: any ConfigRepository =
       useMocks ? InMemoryConfigRepository() : Self.fileRepository()
     _store = State(initialValue: ConfigStore(repository: configRepository))
-    // Shares the store's repository so ETAs reflect what was just edited.
-    etaService = MockETAService(repository: configRepository)
+
+    // ETA services share the store's repository so ETAs reflect what was just edited.
+    if useMocks {
+      routePreview = MockRoutePreviewService()
+      etaService = MockETAService(repository: configRepository)
+    } else {
+      let google = GoogleRoutesClient()
+      routePreview = GoogleRoutePreviewService(client: google)
+      etaService = GoogleETAService(client: google, repository: configRepository)
+    }
 
     if useMocks {
       placeSearch = MockPlaceSearchService()
@@ -45,7 +55,7 @@ struct RoutesETAApp: App {
     WindowGroup {
       RootView(
         store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-        routePreview: MockRoutePreviewService(), etaService: etaService,
+        routePreview: routePreview, etaService: etaService,
         showsSchedules: showsSchedules)
     }
   }

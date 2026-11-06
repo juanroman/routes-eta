@@ -1,5 +1,6 @@
 import CoreGraphics
 import Domain
+import Foundation
 import Mocks
 import Testing
 
@@ -106,5 +107,22 @@ struct RouteMapModelTests {
     await task.value
     #expect(model.polyline.isEmpty)
     #expect(model.status != .loaded)
+  }
+
+  @Test func failureMessageComesFromTheError() async {
+    struct Explaining: LocalizedError, RoutePreviewService {
+      var errorDescription: String? { "Couldn't reach Google." }
+      func preview(origin: LatLng, destination: LatLng, via: [LatLng]) async throws
+        -> RoutePreview
+      { throw self }
+    }
+    let model = RouteMapModel(service: Explaining())
+    await model.load(origin: origin, destination: destination, via: [])
+    #expect(model.status == .failed)
+    #expect(model.failureMessage == "Couldn't reach Google.")
+
+    let ok = RouteMapModel(service: MockRoutePreviewService())
+    await ok.load(origin: origin, destination: destination, via: [])
+    #expect(ok.failureMessage == nil)
   }
 }
