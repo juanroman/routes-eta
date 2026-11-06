@@ -270,6 +270,38 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["Set origin and destination first"].exists)
   }
 
+  @MainActor
+  func testEditViaPointsFullScreenAndComeBack() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Work to Home"].tap()
+    app.staticTexts["Mordor"].tap()  // a direct route: a straight line, no via points
+
+    // While the cover is up the inline screen is still in the accessibility tree, so
+    // these ids can match twice; look at all matches.
+    func labels(_ id: String) -> [String] {
+      app.staticTexts.matching(identifier: id).allElementsBoundByIndex.map(\.label)
+    }
+    XCTAssertTrue(app.staticTexts["via-count"].waitForExistence(timeout: 10))
+    XCTAssertEqual(labels("via-count"), ["No via points"])
+
+    app.buttons["expand-map"].tap()
+    XCTAssertTrue(app.buttons["collapse-map"].waitForExistence(timeout: 5))
+    sleep(2)  // let the preview polyline load and the camera settle
+
+    // Full screen the map fills the window, so its center is the window's center and a
+    // straight line between the two ends passes through it.
+    app.windows.firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+    XCTAssertTrue(app.staticTexts["via-handle-0"].firstMatch.waitForExistence(timeout: 5))
+    XCTAssertTrue(labels("via-count").contains("1 via point"))
+
+    app.buttons["collapse-map"].tap()
+    XCTAssertTrue(app.buttons["expand-map"].waitForExistence(timeout: 5))
+    XCTAssertEqual(labels("via-count"), ["1 via point"])  // same edit, same data
+    XCTAssertTrue(app.staticTexts["via-handle-0"].exists)
+  }
+
   private func waitForLabel(
     of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
     line: UInt = #line

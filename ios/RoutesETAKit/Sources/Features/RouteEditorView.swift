@@ -1,4 +1,5 @@
 import Domain
+import MapKit
 import SwiftUI
 
 /// One route: its map (add/move/remove via points), name, color and delete.
@@ -10,6 +11,8 @@ struct RouteEditorView: View {
 
   @State private var model: RouteMapModel
   @State private var selectedVia: Int?
+  @State private var cameraPosition: MapCameraPosition?
+  @State private var isFullScreen = false
   @State private var draftName = ""
   @State private var loadedName: String?
   @State private var isConfirmingDelete = false
@@ -53,11 +56,16 @@ struct RouteEditorView: View {
     VStack(spacing: 0) {
       mapArea(commute: commute, route: route)
         .frame(height: 340)
-      viaBar(route: route)
+      ViaBar(route: route, selectedVia: $selectedVia) { index in
+        edit { $0.removeVia(at: index) }
+      }
       form(commute: commute, route: route)
     }
     .navigationTitle(route.name)
     .inlineNavigationTitle()
+    .fullScreenCoverOnIOS(isPresented: $isFullScreen) {
+      fullScreenMap(commute: commute, route: route)
+    }
     .task(id: previewKey(commute: commute, route: route)) {
       guard let origin = commute.origin, let destination = commute.destination else { return }
       await model.load(origin: origin.latLng, destination: destination.latLng, via: route.via)
@@ -92,16 +100,7 @@ struct RouteEditorView: View {
   @ViewBuilder
   private func mapArea(commute: Commute, route: RouteDef) -> some View {
     if let origin = commute.origin, let destination = commute.destination {
-      ZStack(alignment: .top) {
-        RouteMapView(
-          origin: origin, destination: destination, color: Color(hex: route.color),
-          via: route.via, polyline: model.polyline, selectedVia: $selectedVia,
-          onAdd: { add($0, to: route) },
-          onMove: { index, point in
-            edit { $0.moveVia(at: index, to: point) }
-          })
-        statusBanner
-      }
+      mapEditor(origin: origin, destination: destination, route: route, expanded: false)
     } else {
       ContentUnavailableView(
         "Set origin and destination first", systemImage: "mappin.slash",
@@ -109,55 +108,31 @@ struct RouteEditorView: View {
     }
   }
 
-  @ViewBuilder private var statusBanner: some View {
-    switch model.status {
-    case .loading:
-      ProgressView().padding(8).background(.regularMaterial, in: Capsule()).padding(8)
-    case .failed:
-      VStack(spacing: 6) {
-        Text(model.failureMessage ?? "Couldn't draw the route")
-          .font(.footnote)
-          .multilineTextAlignment(.center)
-          .lineLimit(4)
-        Button("Retry") { retry() }
-          .font(.subheadline.bold())
-      }
-      .padding(10)
-      .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 14))
-      .padding(8)
-    case .idle, .loaded:
-      EmptyView()
-    }
-  }
-
-  private func viaBar(route: RouteDef) -> some View {
-    HStack {
-      Text(viaSummary(route.via.count))
-        .foregroundStyle(.secondary)
-        .accessibilityIdentifier("via-count")
-      Spacer()
-      if let selected = selectedVia, route.via.indices.contains(selected) {
-        Button("Remove via point \(selected + 1)", role: .destructive) {
-          edit { $0.removeVia(at: selected) }
-          selectedVia = nil
+  @ViewBuilder
+  private func fullScreenMap(commute: Commute, route: RouteDef) -> some View {
+    if let origin = commute.origin, let destination = commute.destination {
+      ZStack(alignment: .bottom) {
+        mapEditor(origin: origin, destination: destination, route: route, expanded: true)
+        ViaBar(route: route, selectedVia: $selectedVia) { index in
+          edit { $0.removeVia(at: index) }
         }
-        .accessibilityIdentifier("remove-via")
-      } else if route.canAddVia {
-        Text("Tap the route to add a via point").font(.footnote).foregroundStyle(.secondary)
-      } else {
-        Text("Maximum of \(maxViaPoints) via points").font(.footnote).foregroundStyle(.orange)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .padding(.horizontal, 12)
+        .padding(.bottom, 8)
       }
     }
-    .padding(.horizontal)
-    .padding(.vertical, 8)
   }
 
-  private func viaSummary(_ count: Int) -> String {
-    switch count {
-    case 0: "No via points"
-    case 1: "1 via point"
-    default: "\(count) via points"
-    }
+  private func mapEditor(
+    origin: NamedPoint, destination: NamedPoint, route: RouteDef, expanded: Bool
+  ) -> some View {
+    RouteMapEditor(
+      origin: origin, destination: destination, route: route, model: model,
+      selectedVia: $selectedVia, cameraPosition: $cameraPosition, isFullScreen: expanded,
+      onAdd: { add($0, to: route) },
+      onMove: { index, point in edit { $0.moveVia(at: index, to: point) } },
+      onRetry: { retry() },
+      onToggleFullScreen: { isFullScreen.toggle() })
   }
 
   private func add(_ point: LatLng, to route: RouteDef) {

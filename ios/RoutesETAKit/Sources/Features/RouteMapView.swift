@@ -26,7 +26,10 @@ struct RouteMapView: View {
   private let hitRadius = 30.0
 
   @State private var dragging: DragState?
-  @State private var initialRegion: MKCoordinateRegion
+  /// Shared with the full-screen copy so pan/zoom survive switching between them;
+  /// nil until the user (or this view) has chosen a camera, then the route is fitted.
+  @Binding var cameraPosition: MapCameraPosition?
+  private let fittedRegion: MKCoordinateRegion
 
   struct DragState: Equatable {
     var index: Int
@@ -35,7 +38,8 @@ struct RouteMapView: View {
 
   init(
     origin: NamedPoint, destination: NamedPoint, color: Color, via: [LatLng], polyline: [LatLng],
-    selectedVia: Binding<Int?>, onAdd: @escaping (LatLng) -> Void,
+    selectedVia: Binding<Int?>, cameraPosition: Binding<MapCameraPosition?>,
+    onAdd: @escaping (LatLng) -> Void,
     onMove: @escaping (Int, LatLng) -> Void
   ) {
     self.origin = origin
@@ -46,15 +50,14 @@ struct RouteMapView: View {
     _selectedVia = selectedVia
     self.onAdd = onAdd
     self.onMove = onMove
-    // Fit once on open; later edits keep whatever pan/zoom the user chose.
-    _initialRegion = State(
-      initialValue: MapRegionFit.region(
-        fitting: [origin.latLng, destination.latLng] + via))
+    _cameraPosition = cameraPosition
+    // Fit the route until a camera has been chosen; later edits keep the user's pan/zoom.
+    fittedRegion = MapRegionFit.region(fitting: [origin.latLng, destination.latLng] + via)
   }
 
   var body: some View {
     MapReader { proxy in
-      Map(initialPosition: .region(initialRegion)) {
+      Map(position: position) {
         if polyline.count > 1 {
           MapPolyline(coordinates: polyline.map(\.coordinate)).stroke(color, lineWidth: 6)
         }
@@ -83,6 +86,12 @@ struct RouteMapView: View {
       shown[dragging.index] = dragging.coordinate
     }
     return shown
+  }
+
+  private var position: Binding<MapCameraPosition> {
+    Binding(
+      get: { cameraPosition ?? .region(fittedRegion) },
+      set: { cameraPosition = $0 })
   }
 
   private func handle(index: Int, proxy: MapProxy) -> some View {
