@@ -11,7 +11,7 @@ struct RouteEditorView: View {
 
   @State private var model: RouteMapModel
   @State private var selectedVia: Int?
-  @State private var cameraPosition: MapCameraPosition?
+  @State private var cameraRegion: MKCoordinateRegion?
   @State private var isFullScreen = false
   @State private var draftName = ""
   @State private var loadedName: String?
@@ -128,7 +128,7 @@ struct RouteEditorView: View {
   ) -> some View {
     RouteMapEditor(
       origin: origin, destination: destination, route: route, model: model,
-      selectedVia: $selectedVia, cameraPosition: $cameraPosition, isFullScreen: expanded,
+      selectedVia: $selectedVia, cameraRegion: $cameraRegion, isFullScreen: expanded,
       onAdd: { add($0, to: route) },
       onMove: { index, point in edit { $0.moveVia(at: index, to: point) } },
       onRetry: { retry() },

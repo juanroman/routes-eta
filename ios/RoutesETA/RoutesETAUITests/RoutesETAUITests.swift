@@ -302,6 +302,44 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertTrue(app.staticTexts["via-handle-0"].exists)
   }
 
+  /// The map's accessibility value is JSON including `"zoom":N`; ~13 is a city, ~4 the world.
+  private func zoomLevels(of app: XCUIApplication) -> [Double] {
+    app.maps.allElementsBoundByIndex.compactMap { map in
+      let text = (map.value as? String) ?? ""
+      guard let range = text.range(of: #""zoom":[0-9.]+"#, options: .regularExpression) else {
+        return nil
+      }
+      return Double(text[range].dropFirst(7))
+    }
+  }
+
+  @MainActor
+  func testFullScreenKeepsTheZoomedViewAndStillZooms() throws {
+    let app = XCUIApplication()
+    app.launchArguments = ["-mock-services"]
+    app.launch()
+    app.staticTexts["Work to Home"].tap()
+    app.staticTexts["City"].tap()
+    XCTAssertTrue(app.maps.firstMatch.waitForExistence(timeout: 10))
+    sleep(3)
+
+    // Regression: after zooming the inline map, expanding it used to show the whole world.
+    app.maps.firstMatch.pinch(withScale: 2.0, velocity: 1.0)
+    sleep(1)
+    app.buttons["expand-map"].tap()
+    XCTAssertTrue(app.buttons["collapse-map"].waitForExistence(timeout: 5))
+    sleep(3)
+    let opened = zoomLevels(of: app)
+    XCTAssertFalse(opened.isEmpty)
+    XCTAssertTrue(opened.allSatisfy { $0 > 9 }, "map opened at zoom levels \(opened)")
+
+    // And zooming works full screen.
+    app.windows.firstMatch.pinch(withScale: 2.0, velocity: 1.0)
+    sleep(1)
+    let zoomed = zoomLevels(of: app)
+    XCTAssertGreaterThan(zoomed.max() ?? 0, (opened.max() ?? 0) + 0.5, "zoom did not change")
+  }
+
   private func waitForLabel(
     of element: XCUIElement, toContain text: String, file: StaticString = #filePath,
     line: UInt = #line

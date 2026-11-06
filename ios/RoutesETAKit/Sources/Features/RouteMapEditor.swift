@@ -11,7 +11,7 @@ struct RouteMapEditor: View {
   let route: RouteDef
   let model: RouteMapModel
   @Binding var selectedVia: Int?
-  @Binding var cameraPosition: MapCameraPosition?
+  @Binding var cameraRegion: MKCoordinateRegion?
   let isFullScreen: Bool
   let onAdd: (LatLng) -> Void
   let onMove: (Int, LatLng) -> Void
@@ -23,7 +23,7 @@ struct RouteMapEditor: View {
       RouteMapView(
         origin: origin, destination: destination, color: Color(hex: route.color),
         via: route.via, polyline: model.polyline, selectedVia: $selectedVia,
-        cameraPosition: $cameraPosition, onAdd: onAdd, onMove: onMove
+        cameraRegion: $cameraRegion, onAdd: onAdd, onMove: onMove
       )
       // Full screen: the map runs under the status bar and home indicator, while the
       // buttons below stay inside the safe area.

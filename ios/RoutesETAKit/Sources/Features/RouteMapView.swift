@@ -26,9 +26,12 @@ struct RouteMapView: View {
   private let hitRadius = 30.0
 
   @State private var dragging: DragState?
-  /// Shared with the full-screen copy so pan/zoom survive switching between them;
-  /// nil until the user (or this view) has chosen a camera, then the route is fitted.
-  @Binding var cameraPosition: MapCameraPosition?
+  /// The last region this map (or the other copy of it, inline vs full screen) settled
+  /// on, so pan/zoom survive switching between them. Each map only *starts* there
+  /// (`initialPosition`) and reports changes back; binding a `MapCameraPosition`
+  /// directly made the full-screen copy open on a world view and ignore zoom.
+  /// nil until a camera has settled, then the route is fitted.
+  @Binding var cameraRegion: MKCoordinateRegion?
   private let fittedRegion: MKCoordinateRegion
 
   struct DragState: Equatable {
@@ -38,7 +41,7 @@ struct RouteMapView: View {
 
   init(
     origin: NamedPoint, destination: NamedPoint, color: Color, via: [LatLng], polyline: [LatLng],
-    selectedVia: Binding<Int?>, cameraPosition: Binding<MapCameraPosition?>,
+    selectedVia: Binding<Int?>, cameraRegion: Binding<MKCoordinateRegion?>,
     onAdd: @escaping (LatLng) -> Void,
     onMove: @escaping (Int, LatLng) -> Void
   ) {
@@ -50,14 +53,14 @@ struct RouteMapView: View {
     _selectedVia = selectedVia
     self.onAdd = onAdd
     self.onMove = onMove
-    _cameraPosition = cameraPosition
+    _cameraRegion = cameraRegion
     // Fit the route until a camera has been chosen; later edits keep the user's pan/zoom.
     fittedRegion = MapRegionFit.region(fitting: [origin.latLng, destination.latLng] + via)
   }
 
   var body: some View {
     MapReader { proxy in
-      Map(position: position) {
+      Map(initialPosition: .region(cameraRegion ?? fittedRegion)) {
         if polyline.count > 1 {
           MapPolyline(coordinates: polyline.map(\.coordinate)).stroke(color, lineWidth: 6)
         }
@@ -73,6 +76,9 @@ struct RouteMapView: View {
           }
         }
       }
+      .onMapCameraChange(frequency: .onEnd) { context in
+        cameraRegion = context.region
+      }
       .onTapGesture(coordinateSpace: .global) { point in
         handleTap(at: point, proxy: proxy)
       }
@@ -86,12 +92,6 @@ struct RouteMapView: View {
       shown[dragging.index] = dragging.coordinate
     }
     return shown
-  }
-
-  private var position: Binding<MapCameraPosition> {
-    Binding(
-      get: { cameraPosition ?? .region(fittedRegion) },
-      set: { cameraPosition = $0 })
   }
 
   private func handle(index: Int, proxy: MapProxy) -> some View {
