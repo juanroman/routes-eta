@@ -31,9 +31,7 @@ struct RoutesSection: View {
       }
       .onMove { source, destination in
         Task {
-          errorMessage = await store.updateCommute(id: commuteID) {
-            $0.routes.move(fromOffsets: source, toOffset: destination)
-          }
+          errorMessage = await store.moveRoute(in: commuteID, from: source, to: destination)
         }
       }
 
