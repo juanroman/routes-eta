@@ -51,6 +51,7 @@ struct RouteMapEditor: View {
       .frame(maxHeight: .infinity, alignment: .topTrailing)
       .allowsHitTesting(true)
     }
+    .tapStudyScreen(isFullScreen: isFullScreen)  // TAP-STUDY
   }
 
   @ViewBuilder private var statusBanner: some View {

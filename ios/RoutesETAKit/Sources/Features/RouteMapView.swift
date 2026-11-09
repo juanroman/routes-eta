@@ -82,6 +82,7 @@ struct RouteMapView: View {
       .onTapGesture(coordinateSpace: .global) { point in
         handleTap(at: point, proxy: proxy)
       }
+      .tapStudyObserver(polyline: polyline, via: via, proxy: proxy)  // TAP-STUDY
     }
   }
 
@@ -123,6 +124,7 @@ struct RouteMapView: View {
   }
 
   private func handleTap(at point: CGPoint, proxy: MapProxy) {
+    TapStudyLog.shared.record(.tap, at: point)  // TAP-STUDY
     let handles = via.compactMap { proxy.convert($0.coordinate, to: .global) }
     if ScreenGeometry.isNear(point, anyOf: handles, within: hitRadius) { return }
     selectedVia = nil
