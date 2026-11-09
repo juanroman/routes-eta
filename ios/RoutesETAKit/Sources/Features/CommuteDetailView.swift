@@ -40,7 +40,9 @@ struct CommuteDetailView: View {
       .navigationTitle(commute.name)
       .inlineNavigationTitle()
       .toolbar {
-        ToolbarItem(placement: .primaryAction) { ReorderButton() }
+        if commute.routes.count > 1 {
+          ToolbarItem(placement: .primaryAction) { ReorderButton() }
+        }
         ToolbarItem(placement: .primaryAction) {
           Menu("More", systemImage: "ellipsis.circle") {
             Button("Rename", systemImage: "pencil") {

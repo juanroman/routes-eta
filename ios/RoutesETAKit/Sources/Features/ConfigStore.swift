@@ -83,6 +83,25 @@ public final class ConfigStore {
     }
   }
 
+  /// Reorders the commutes. The order is the array order in the config, which the
+  /// API and the web builder read too, so no extra field is needed.
+  @discardableResult
+  public func moveCommute(from source: IndexSet, to destination: Int) async -> String? {
+    var updated = entries
+    updated.move(fromOffsets: source, toOffset: destination)
+    return await apply(updated)
+  }
+
+  /// Reorders a commute's routes. Routes are addressed by index (`AppRoute.routeEditor`),
+  /// which is safe because reordering only happens on the list screen, never with an
+  /// editor on the navigation stack.
+  @discardableResult
+  public func moveRoute(
+    in id: CommuteEntry.ID, from source: IndexSet, to destination: Int
+  ) async -> String? {
+    await updateCommute(id: id) { $0.routes.move(fromOffsets: source, toOffset: destination) }
+  }
+
   @discardableResult
   public func deleteCommute(id: CommuteEntry.ID) async -> String? {
     await apply(entries.filter { $0.id != id })

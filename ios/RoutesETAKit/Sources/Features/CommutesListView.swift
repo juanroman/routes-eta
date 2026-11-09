@@ -23,6 +23,9 @@ struct CommutesListView: View {
     }
     .navigationTitle("Commutes")
     .toolbar {
+      if store.entries.count > 1 {
+        ToolbarItem(placement: .primaryAction) { ReorderButton() }
+      }
       ToolbarItem(placement: .primaryAction) {
         Button("Add Commute", systemImage: "plus") {
           draftName = ""
@@ -75,6 +78,9 @@ struct CommutesListView: View {
             renaming = entry.id
           }
         }
+      }
+      .onMove { source, destination in
+        Task { errorMessage = await store.moveCommute(from: source, to: destination) }
       }
     }
     .overlay {

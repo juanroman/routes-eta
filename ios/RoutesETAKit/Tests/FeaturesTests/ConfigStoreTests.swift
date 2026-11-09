@@ -228,6 +228,23 @@ struct RouteEditingStoreTests {
     #expect(store.entry(id: id)?.commute.routes[0].name == "City")
   }
 
+  @Test func moveRouteReordersAndPersists() async throws {
+    let fixture = try await loaded()
+    let (store, id, repository) = (fixture.store, fixture.id, fixture.repository)
+    #expect(await store.moveRoute(in: id, from: IndexSet(integer: 1), to: 0) == nil)
+    #expect(store.entry(id: id)?.commute.routes.map(\.name) == ["Mordor", "City"])
+    #expect(try await repository.load().commutes.first?.routes.map(\.name) == ["Mordor", "City"])
+  }
+
+  @Test func moveCommuteReordersAndPersists() async throws {
+    let fixture = try await loaded()
+    let (store, repository) = (fixture.store, fixture.repository)
+    #expect(await store.moveCommute(from: IndexSet(integer: 1), to: 0) == nil)
+    #expect(store.entries.map(\.commute.name) == ["Home to Work", "Work to Home"])
+    #expect(
+      try await repository.load().commutes.map(\.name) == ["Home to Work", "Work to Home"])
+  }
+
   @Test func reorderingKeepsRoutesIntact() async throws {
     let fixture = try await loaded()
     let (store, id) = (fixture.store, fixture.id)
@@ -253,6 +270,8 @@ struct ConfigStoreWriteFailureTests {
     let id = try #require(before.first?.id)
     #expect(await store.renameCommute(id: id, to: "Evening") != nil)
     #expect(await store.deleteCommute(id: id) != nil)
+    #expect(await store.moveCommute(from: IndexSet(integer: 1), to: 0) != nil)
+    #expect(await store.moveRoute(in: id, from: IndexSet(integer: 1), to: 0) != nil)
     #expect(store.entries == before)
   }
 }
