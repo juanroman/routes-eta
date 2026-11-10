@@ -63,7 +63,6 @@ struct RouteEditorView: View {
     }
     .navigationTitle(route.name)
     .inlineNavigationTitle()
-    .tapStudyViaChanges(route.via)  // TAP-STUDY
     .fullScreenCoverOnIOS(isPresented: $isFullScreen) {
       fullScreenMap(commute: commute, route: route)
     }
