@@ -23,7 +23,6 @@ struct CommutesListView: View {
     }
     .navigationTitle("Commutes")
     .toolbar {
-      TapStudyToolbarItem()  // TAP-STUDY
       if store.entries.count > 1 {
         ToolbarItem(placement: .primaryAction) { ReorderButton() }
       }
