@@ -36,7 +36,9 @@ struct RoutesETAApp: App {
       etaService = MockETAService(repository: configRepository)
     } else {
       let google = GoogleRoutesClient()
-      routePreview = GoogleRoutePreviewService(client: google)
+      // Lines are cached on the device, so only new or edited routes cost a Google call.
+      routePreview = CachedRoutePreviewService(
+        wrapping: GoogleRoutePreviewService(client: google), cache: Self.lineCache())
       etaService = GoogleETAService(client: google, repository: configRepository)
     }
 
@@ -58,6 +60,14 @@ struct RoutesETAApp: App {
         routePreview: routePreview, etaService: etaService,
         showsSchedules: showsSchedules)
     }
+  }
+
+  private static func lineCache() -> FileRouteLineCache {
+    // Same last resort as the config file: a cache in the temporary directory still works.
+    let url =
+      (try? FileRouteLineCache.defaultURL())
+      ?? FileManager.default.temporaryDirectory.appending(path: "route-lines.json")
+    return FileRouteLineCache(url: url)
   }
 
   private static func fileRepository() -> FileConfigRepository {

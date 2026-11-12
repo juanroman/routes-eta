@@ -25,6 +25,27 @@ public protocol RoutePreviewService: Sendable {
   func preview(origin: LatLng, destination: LatLng, via: [LatLng]) async throws -> RoutePreview
 }
 
+/// What a drawn route depends on. Place labels are left out on purpose: renaming
+/// "Home" must not throw away a line that still goes to the same coordinates.
+public struct RouteLineKey: Hashable, Codable, Sendable {
+  public var origin: LatLng
+  public var destination: LatLng
+  public var via: [LatLng]
+
+  public init(origin: LatLng, destination: LatLng, via: [LatLng]) {
+    self.origin = origin
+    self.destination = destination
+    self.via = via
+  }
+}
+
+/// Remembers drawn routes so they don't have to be asked from Google again. A cache
+/// is best effort: it never throws, and a failure to read or write is just a miss.
+public protocol RouteLineCache: Sendable {
+  func line(for key: RouteLineKey) async -> RoutePreview?
+  func store(_ preview: RoutePreview, for key: RouteLineKey) async
+}
+
 /// One route's ETA. `minutes == nil` means this route failed (`error` says why).
 public struct RouteETA: Hashable, Sendable {
   public var name: String

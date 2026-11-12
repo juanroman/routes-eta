@@ -1,4 +1,4 @@
-/// Google's encoded polyline format (precision 5). Swift port of
+/// Google's encoded polyline format (precision 5). `decode` is a Swift port of
 /// `api/app/polyline.py`'s `decode_polyline`, with bounds checks so a truncated
 /// or corrupt string throws instead of crashing.
 public enum PolylineCodec {
@@ -34,5 +34,32 @@ public enum PolylineCodec {
       coordinates.append(LatLng(lat: Double(lat) / 1e5, lng: Double(lng) / 1e5))
     }
     return coordinates
+  }
+
+  /// The inverse of `decode`. Lossless for lines that came from Google (they already
+  /// have 5 decimals); other coordinates are rounded to 5 (about a metre).
+  public static func encode(_ points: [LatLng]) -> String {
+    var output = ""
+    var previousLat = 0
+    var previousLng = 0
+
+    func append(_ delta: Int) {
+      var value = delta < 0 ? ~(delta << 1) : (delta << 1)
+      while value >= 0x20 {
+        output.unicodeScalars.append(UnicodeScalar(UInt8((0x20 | (value & 0x1F)) + 63)))
+        value >>= 5
+      }
+      output.unicodeScalars.append(UnicodeScalar(UInt8(value + 63)))
+    }
+
+    for point in points {
+      let lat = Int((point.lat * 1e5).rounded())
+      let lng = Int((point.lng * 1e5).rounded())
+      append(lat - previousLat)
+      append(lng - previousLng)
+      previousLat = lat
+      previousLng = lng
+    }
+    return output
   }
 }
