@@ -71,25 +71,29 @@ struct LocationSettingSection: View {
   @ViewBuilder private func row(_ setting: LocationSetting) -> some View {
     switch setting.action {
     case .none:
-      content(setting)
+      content(setting, isAction: false)
     case .askSystem, .openSettings:
       Button {
         perform(setting.action)
       } label: {
-        content(setting)
+        content(setting, isAction: true)
       }
+      // Plain, so only the title takes the accent colour (it is the action) and the explanation
+      // below it stays secondary instead of the whole row turning blue.
+      .buttonStyle(.plain)
       .accessibilityIdentifier("location-setting-action")
     }
   }
 
-  private func content(_ setting: LocationSetting) -> some View {
+  private func content(_ setting: LocationSetting, isAction: Bool) -> some View {
     VStack(alignment: .leading, spacing: 2) {
-      Text(setting.title)
+      Text(setting.title).foregroundStyle(isAction ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
       if let detail = setting.detail {
         Text(detail).font(.footnote).foregroundStyle(.secondary)
       }
     }
     .frame(maxWidth: .infinity, alignment: .leading)
+    .contentShape(Rectangle())
     .accessibilityElement(children: .combine)
     .accessibilityIdentifier("location-setting")
   }

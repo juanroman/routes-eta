@@ -42,7 +42,10 @@ final class ETAModel {
     }
     isRefreshing = true
     defer { isRefreshing = false }
-    await fetch()
+    // On its own task, not the caller's: SwiftUI cancels the task of a pull-to-refresh whenever
+    // the view updates while it runs (which `isRefreshing` itself causes), and a cancelled fetch
+    // throws its result away. The user asked for fresh numbers, so they must arrive anyway.
+    await Task { await fetch() }.value
   }
 
   private func fetch() async {
