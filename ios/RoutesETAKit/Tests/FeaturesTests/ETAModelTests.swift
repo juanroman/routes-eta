@@ -171,6 +171,24 @@ struct ETAModelRefreshTests {
     #expect(minutes(model) == 20)
   }
 
+  @Test func aCancelledRefreshStillDeliversTheNewNumbers() async {
+    // SwiftUI cancels a pull-to-refresh's task when the view updates meanwhile; the fresh
+    // numbers the user asked for must not be thrown away with it.
+    let service = GatedETAService()
+    let model = ETAModel(service: service, commuteName: "C")
+    await model.load()
+
+    await service.close()
+    let refreshing = Task { await model.refresh() }
+    await waitForCalls(2, on: service)
+    refreshing.cancel()
+    await service.release()
+    await refreshing.value
+
+    #expect(minutes(model) == 20)
+    #expect(!model.isRefreshing)
+  }
+
   @Test func loadReplacesTheNumbersWithASpinner() async {
     let service = GatedETAService()
     let model = ETAModel(service: service, commuteName: "C")

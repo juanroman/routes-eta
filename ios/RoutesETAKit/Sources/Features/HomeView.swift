@@ -107,11 +107,10 @@ private struct CommuteSelector: View {
           ForEach(names, id: \.self) { Text($0).tag($0) }
         }
       } label: {
-        HStack {
-          Text(binding.wrappedValue).font(.headline)
-          Image(systemName: "chevron.down").font(.footnote.bold())
-          Spacer()
-        }
+        // One piece of text, so the chevron stays at the end of the name even when it wraps.
+        Text("\(binding.wrappedValue) \(Image(systemName: "chevron.down"))")
+          .font(.headline)
+          .frame(maxWidth: .infinity, alignment: .leading)
       }
       .accessibilityIdentifier("home-selector")
     }
@@ -157,6 +156,9 @@ private struct HomeETAContent: View {
         stateContent(model.state)
           .padding()
       }
+      // Always bounce, even when the few chips don't fill the screen: otherwise there is
+      // nothing to pull and pull-to-refresh never starts.
+      .scrollBounceBehavior(.always)
       .refreshable { await refresh() }
       .accessibilityIdentifier("eta-results")
       if case .loaded(let report, let fetchedAt) = model.state, !report.allFailed {

@@ -26,20 +26,50 @@ struct ETAChip: View {
   let color: Color
   let isFastest: Bool
 
+  @Environment(\.dynamicTypeSize) private var typeSize
+
   var body: some View {
-    HStack {
-      Circle().fill(color).frame(width: 14, height: 14)
-      VStack(alignment: .leading, spacing: 2) {
-        Text(result.name).font(.headline)
-        if isFastest { Text("Fastest").font(.caption).foregroundStyle(.green) }
-        if let error = result.error { Text(error).font(.caption).foregroundStyle(.secondary) }
-      }
-      Spacer()
-      Text(result.minutes.map { "\($0) min" } ?? "?").font(.title2.bold())
+    Group {
+      if typeSize.isAccessibilitySize { stacked } else { inline }
     }
     .padding()
     .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
     .accessibilityElement(children: .combine)
     .accessibilityIdentifier("eta-\(result.name)")
+  }
+
+  /// Name on the left, minutes on the right.
+  private var inline: some View {
+    HStack {
+      Circle().fill(color).frame(width: 14, height: 14)
+      details
+      Spacer()
+      minutes
+    }
+  }
+
+  /// At accessibility sizes the two don't fit side by side without breaking the name in the
+  /// middle of a word, so the minutes go underneath.
+  private var stacked: some View {
+    VStack(alignment: .leading, spacing: 6) {
+      HStack(alignment: .firstTextBaseline) {
+        Circle().fill(color).frame(width: 14, height: 14)
+        details
+      }
+      minutes
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+  }
+
+  private var details: some View {
+    VStack(alignment: .leading, spacing: 2) {
+      Text(result.name).font(.headline)
+      if isFastest { Text("Fastest").font(.caption).foregroundStyle(.green) }
+      if let error = result.error { Text(error).font(.caption).foregroundStyle(.secondary) }
+    }
+  }
+
+  private var minutes: some View {
+    Text(result.minutes.map { "\($0) min" } ?? "?").font(.title2.bold())
   }
 }
