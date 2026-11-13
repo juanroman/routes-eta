@@ -29,6 +29,14 @@ public struct GoogleETAService: ETAService {
     self.repository = repository
   }
 
+  public func minutes(
+    for route: RouteDef, from origin: LatLng, to destination: LatLng
+  ) async throws -> Int {
+    let seconds = try await client.routeDurationSeconds(
+      origin: origin, destination: destination, via: route.via)
+    return RouteETA.minutes(fromSeconds: seconds)
+  }
+
   public func run(commute name: String) async throws -> ETAReport {
     let config = try await repository.load()
     guard let commute = config.commutes.first(where: { $0.name == name }) else {

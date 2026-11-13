@@ -41,14 +41,23 @@ public final class ConfigStore {
     }
   }
 
-  /// Each mutator returns a user-facing error message, or `nil` on success.
-  @discardableResult
-  public func addCommute(named name: String) async -> String? {
-    let trimmed = name.trimmingCharacters(in: .whitespaces)
-    var updated = entries
-    updated.append(CommuteEntry(commute: Commute(name: trimmed)))
-    return await apply(updated)
+  /// Appends a commute with its places (the new-commute form requires both; the model
+  /// itself still allows none, like the API's). Returns its id so the caller can open it,
+  /// or the error message.
+  public func addCommute(
+    named name: String, origin: NamedPoint? = nil, destination: NamedPoint? = nil
+  ) async -> Result<CommuteEntry.ID, ConfigStoreError> {
+    let entry = CommuteEntry(
+      commute: Commute(
+        name: name.trimmingCharacters(in: .whitespaces), origin: origin, destination: destination
+      ))
+    if let message = await apply(entries + [entry]) {
+      return .failure(ConfigStoreError(message: message))
+    }
+    return .success(entry.id)
   }
+
+  /// The mutators below return a user-facing error message, or `nil` on success.
 
   @discardableResult
   public func renameCommute(id: CommuteEntry.ID, to name: String) async -> String? {

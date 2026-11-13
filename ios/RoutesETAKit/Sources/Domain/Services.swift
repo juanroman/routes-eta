@@ -80,6 +80,12 @@ public enum ETAServiceError: Error, Equatable, Sendable {
 
 public protocol ETAService: Sendable {
   func run(commute: String) async throws -> ETAReport
+
+  /// Traffic-aware minutes for one route, departing now: what the commute screen shows for the
+  /// selected route. Throws when it can't be fetched.
+  func minutes(
+    for route: RouteDef, from origin: LatLng, to destination: LatLng
+  ) async throws -> Int
 }
 
 /// Finds places to use as a commute's origin or destination, in two steps like

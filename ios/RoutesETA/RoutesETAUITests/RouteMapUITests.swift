@@ -12,7 +12,8 @@ final class RouteMapUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Work to Home"].tap()
-    app.staticTexts["Mordor"].tap()  // a direct route: a straight line, no via points
+    app.expandCommuteSheet()
+    app.buttons["edit-route-Mordor"].tap()  // a direct route: a straight line, no via points
 
     let count = app.staticTexts["via-count"]
     XCTAssertTrue(count.waitForExistence(timeout: 10))
@@ -55,7 +56,8 @@ final class RouteMapUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Work to Home"].tap()
-    app.staticTexts["Mordor"].tap()  // a direct route: a straight line, no via points
+    app.expandCommuteSheet()
+    app.buttons["edit-route-Mordor"].tap()  // a direct route: a straight line, no via points
 
     // While the cover is up the inline screen is still in the accessibility tree, so
     // these ids can match twice; look at all matches.
@@ -87,7 +89,8 @@ final class RouteMapUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Work to Home"].tap()
-    app.staticTexts["City"].tap()
+    app.expandCommuteSheet()
+    app.buttons["edit-route-City"].tap()
     XCTAssertTrue(app.maps.firstMatch.waitForExistence(timeout: 10))
     sleep(3)
 
