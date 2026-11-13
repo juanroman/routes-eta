@@ -31,11 +31,12 @@ final class ReorderUITests: XCTestCase {
     XCTAssertTrue(routeIsAbove("Mordor", "City", in: app))
   }
 
-  func testEditIsHiddenWhenThereIsNothingToReorder() throws {
+  /// Edit isn't only for reordering: it also shows the places, so it is there with one route.
+  func testEditIsAvailableEvenWithOneRoute() throws {
     let app = launch()
     app.staticTexts["Home to Work"].tap()  // one route only
     XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.buttons["Edit"].exists)
+    XCTAssertTrue(app.buttons["Edit"].exists)
   }
 
   // MARK: - Helpers

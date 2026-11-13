@@ -17,7 +17,7 @@ final class RoutesETAUITests: XCTestCase {
 
     // The sheet opens small, which leaves the back button uncovered (pulled all the way
     // up it would cover it).
-    XCTAssertTrue(app.buttons["endpoint-From"].waitForExistence(timeout: 10))
+    XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.navigationBars["Work to Home"].exists)
 
     app.navigationBars.buttons["Commutes"].tap()
@@ -55,6 +55,9 @@ final class RoutesETAUITests: XCTestCase {
 
     app.staticTexts["Work to Home"].tap()
 
+    // The places only show while editing.
+    app.buttons["Edit"].tap()
+
     // Search like Calendar's Location field, then pick a result.
     app.buttons["endpoint-To"].tap()
     let search = app.searchFields.firstMatch
@@ -82,6 +85,7 @@ final class RoutesETAUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Work to Home"].tap()
+    app.buttons["Edit"].tap()  // the places only show while editing
 
     // First use: Home is unset, so tapping it asks for an address.
     app.buttons["endpoint-From"].tap()
@@ -216,21 +220,21 @@ final class RoutesETAUITests: XCTestCase {
   }
 
   @MainActor
-  func testShowETAsIsDisabledUntilTheCommuteIsComplete() throws {
+  func testShowETAsIsDisabledUntilTheCommuteHasARoute() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-
-    app.buttons["Add Commute"].tap()
-    let field = app.alerts.textFields["Name"]
-    XCTAssertTrue(field.waitForExistence(timeout: 5))
-    field.typeText("Gym")
-    app.alerts.buttons["Add"].tap()
-    app.staticTexts["Gym"].tap()
+    app.staticTexts["Home to Work"].tap()
     app.expandCommuteSheet()
 
+    // Remove its only route, which leaves the places but nothing to measure.
+    app.buttons["City"].swipeLeft()
+    app.buttons["Delete"].tap()
+    app.alerts.buttons["Delete Route"].tap()
+
+    // The route is removed asynchronously: wait for the explanation to show up first.
+    XCTAssertTrue(app.staticTexts["Add a route first"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.buttons["show-etas"].isEnabled)
-    XCTAssertTrue(app.staticTexts["Set origin and destination first"].exists)
   }
 
   private func waitForLabel(

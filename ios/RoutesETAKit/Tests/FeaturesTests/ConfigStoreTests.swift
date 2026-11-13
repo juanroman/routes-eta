@@ -22,15 +22,30 @@ struct ConfigStoreTests {
 
   @Test func addPersistsAndTrimsTheName() async throws {
     let (store, repository) = await loadedStore()
-    #expect(await store.addCommute(named: "  Gym  ") == nil)
+    let result = await store.addCommute(named: "  Gym  ")
+    #expect(result == .success(try #require(store.entries.last?.id)))
     #expect(store.entries.last?.commute.name == "Gym")
     #expect(try await repository.load().commutes.last?.name == "Gym")
   }
 
+  @Test func addKeepsTheChosenPlaces() async throws {
+    let (store, repository) = await loadedStore()
+    let gym = NamedPoint(label: "Gym", lat: 19.41, lng: -99.17)
+    let result = await store.addCommute(
+      named: "Evening", origin: SampleData.home, destination: gym)
+
+    let id = try result.get()
+    #expect(store.entry(id: id)?.commute.origin == SampleData.home)
+    #expect(store.entry(id: id)?.commute.destination == gym)
+    #expect(try await repository.load().commutes.last?.destination == gym)
+  }
+
   @Test func addRejectsBlankAndDuplicateNames() async {
     let (store, _) = await loadedStore()
-    #expect(await store.addCommute(named: "   ") != nil)
-    #expect(await store.addCommute(named: "Work to Home") != nil)
+    for name in ["   ", "Work to Home"] {
+      let result = await store.addCommute(named: name)
+      #expect(throws: ConfigStoreError.self) { try result.get() }
+    }
     #expect(store.entries.count == 2)
   }
 
@@ -266,7 +281,9 @@ struct ConfigStoreWriteFailureTests {
     await store.load()
     let before = store.entries
 
-    #expect(await store.addCommute(named: "Gym") == "Couldn't save your changes.")
+    #expect(
+      await store.addCommute(named: "Gym")
+        == .failure(ConfigStoreError(message: "Couldn't save your changes.")))
     let id = try #require(before.first?.id)
     #expect(await store.renameCommute(id: id, to: "Evening") != nil)
     #expect(await store.deleteCommute(id: id) != nil)

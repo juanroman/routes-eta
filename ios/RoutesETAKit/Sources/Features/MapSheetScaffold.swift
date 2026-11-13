@@ -3,8 +3,8 @@ import MapKit
 import SwiftUI
 
 enum MapSheetMetrics {
-  /// The sheet's smallest detent: a title and a couple of rows.
-  static let smallHeight: CGFloat = 230
+  /// The sheet's smallest detent: the title, the trip line and about two rows.
+  static let smallHeight: CGFloat = 270
 }
 
 /// A full-bleed map with a persistent bottom sheet over it, like Find My: the map is the

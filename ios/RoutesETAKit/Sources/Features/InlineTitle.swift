@@ -58,3 +58,36 @@ extension View {
     #endif
   }
 }
+
+extension View {
+  /// Drives the edit mode of the lists inside from our own flag, so the screen can read it
+  /// (to show or hide what only belongs in edit mode). `EditMode` doesn't exist on the macOS
+  /// test host, where this does nothing.
+  func editing(_ isEditing: Binding<Bool>) -> some View {
+    #if os(iOS)
+      environment(
+        \.editMode,
+        Binding(
+          get: { isEditing.wrappedValue ? .active : .inactive },
+          set: { isEditing.wrappedValue = $0.isEditing }))
+    #else
+      self
+    #endif
+  }
+}
+
+/// Shows its content only while the list it sits in is in edit mode. It reads the live edit
+/// mode itself instead of taking a flag: content built once for a sheet doesn't see later
+/// changes to the screen's own state, but the environment is always current.
+struct EditOnly<Content: View>: View {
+  @ViewBuilder let content: Content
+  #if os(iOS)
+    @Environment(\.editMode) private var editMode
+  #endif
+
+  var body: some View {
+    #if os(iOS)
+      if editMode?.wrappedValue.isEditing == true { content }
+    #endif
+  }
+}

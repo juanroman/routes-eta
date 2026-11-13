@@ -18,7 +18,7 @@ final class CommuteMapUITests: XCTestCase {
     if expanded {
       app.expandCommuteSheet()
     } else {
-      XCTAssertTrue(app.buttons["endpoint-From"].waitForExistence(timeout: 10))
+      XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 10))
     }
     return app
   }
@@ -71,7 +71,7 @@ final class CommuteMapUITests: XCTestCase {
 
     let window = app.windows.firstMatch.frame
     let top = app.navigationBars.buttons["Commutes"].frame.maxY
-    let uncoveredBottom = window.height - 230
+    let uncoveredBottom = window.height - 270  // the sheet's small detent
     let centre = CGVector(dx: 0.5, dy: (top + (uncoveredBottom - top) / 2) / window.height)
     app.windows.firstMatch.coordinate(withNormalizedOffset: centre).tap()
 
@@ -79,5 +79,18 @@ final class CommuteMapUITests: XCTestCase {
     let mordor = app.buttons["Mordor"]
     XCTAssertTrue(mordor.waitForExistence(timeout: 5))
     XCTAssertTrue(mordor.isSelected)
+  }
+
+  func testThePlacesOnlyShowWhileEditing() throws {
+    let app = openWorkToHome(expanded: false)
+    XCTAssertFalse(app.buttons["endpoint-From"].exists)
+    XCTAssertFalse(app.buttons["endpoint-To"].exists)
+
+    app.buttons["Edit"].tap()
+    XCTAssertTrue(app.buttons["endpoint-From"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["endpoint-To"].exists)
+
+    app.buttons["Done"].tap()
+    XCTAssertTrue(app.buttons["endpoint-From"].waitForNonExistence(timeout: 5))
   }
 }

@@ -32,6 +32,7 @@ struct CommuteMapScreen: View {
   @State private var draftName = ""
   @State private var errorMessage: String?
   @State private var isShowingETAs = false
+  @State private var isEditing = false
   @State private var pendingRouteDelete: Int?
   @Environment(\.dismiss) private var dismiss
 
@@ -117,7 +118,7 @@ struct CommuteMapScreen: View {
 
   @ViewBuilder private func banner(for commute: Commute) -> some View {
     if commute.origin == nil || commute.destination == nil {
-      Label("Set origin and destination to see your routes", systemImage: "mappin.slash")
+      Label("Tap Edit to set origin and destination", systemImage: "mappin.slash")
         .font(.footnote)
         .padding(10)
         .background(.regularMaterial, in: Capsule())
@@ -149,30 +150,40 @@ struct CommuteMapScreen: View {
           }
       }
       .navigationTitle(commute.name)
+      .navigationSubtitle(tripLine(for: commute))
       .largeNavigationTitle()
       .toolbar {
-        if commute.routes.count > 1 {
-          ToolbarItem(placement: .primaryAction) { ReorderButton() }
-        }
+        ToolbarItem(placement: .primaryAction) { ReorderButton() }
         ToolbarItem(placement: .primaryAction) {
           Button("Add Route", systemImage: "plus") { Task { await addRoute() } }
             .accessibilityIdentifier("add-route")
         }
       }
     }
+    .editing($isEditing)
+  }
+
+  /// "Work → Home" under the title: which way this commute goes, without the rows to change it.
+  private func tripLine(for commute: Commute) -> String {
+    guard let origin = commute.origin, let destination = commute.destination else { return "" }
+    return "\(origin.label) → \(destination.label)"
   }
 
   private func list(for commute: Commute) -> some View {
     List {
-      Section("Trip") {
-        endpointRow(.origin, point: commute.origin)
-        endpointRow(.destination, point: commute.destination)
+      // The places are set once, when the commute is created, so they only show up while
+      // editing (the sheet's Edit button).
+      EditOnly {
+        Section("Trip") {
+          endpointRow(.origin, point: commute.origin)
+          endpointRow(.destination, point: commute.destination)
+        }
       }
 
       RoutesSection(
         store: store, router: router, commuteID: commuteID, routes: commute.routes,
         selected: $selectedRoute, pendingDelete: $pendingRouteDelete,
-        errorMessage: $errorMessage)
+        errorMessage: $errorMessage, onAdd: { Task { await addRoute() } })
 
       if showsSchedules {
         Section("Schedule") {

@@ -16,9 +16,14 @@ struct RoutesSection: View {
   /// alerts: alerts attached to a `Section` inside a `List` proved unreliable.
   @Binding var pendingDelete: Int?
   @Binding var errorMessage: String?
+  /// What the empty state's button does (the same as the sheet's "+").
+  let onAdd: () -> Void
 
   var body: some View {
     Section("Routes") {
+      if routes.isEmpty {
+        Button("Add your first route", systemImage: "plus", action: onAdd)
+      }
       ForEach(Array(routes.enumerated()), id: \.element.name) { index, route in
         HStack {
           Button {

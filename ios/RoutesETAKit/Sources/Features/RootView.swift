@@ -27,21 +27,23 @@ public struct RootView: View {
 
   public var body: some View {
     NavigationStack(path: $router.path) {
-      CommutesListView(store: store)
-        .navigationDestination(for: AppRoute.self) { route in
-          switch route {
-          case .commute(let id):
-            CommuteMapScreen(
-              store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-              etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
-              commuteID: id)
-          case .routeEditor(let commuteID, let route):
-            RouteEditorView(
-              store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
-          case .scheduleEditor(let commuteID):
-            ScheduleEditorView(store: store, commuteID: commuteID)
-          }
+      CommutesListView(
+        store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces
+      )
+      .navigationDestination(for: AppRoute.self) { route in
+        switch route {
+        case .commute(let id):
+          CommuteMapScreen(
+            store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
+            etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
+            commuteID: id)
+        case .routeEditor(let commuteID, let route):
+          RouteEditorView(
+            store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
+        case .scheduleEditor(let commuteID):
+          ScheduleEditorView(store: store, commuteID: commuteID)
         }
+      }
     }
     .task {
       await savedPlaces.load()
