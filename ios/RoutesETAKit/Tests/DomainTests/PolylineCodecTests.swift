@@ -30,4 +30,32 @@ struct PolylineCodecTests {
       try PolylineCodec.decode(" \u{1}")
     }
   }
+
+  @Test func encodesGoogleDocumentedExample() {
+    let points = [
+      LatLng(lat: 38.5, lng: -120.2), LatLng(lat: 40.7, lng: -120.95),
+      LatLng(lat: 43.252, lng: -126.453),
+    ]
+    #expect(PolylineCodec.encode(points) == "_p~iF~ps|U_ulLnnqC_mqNvxq`@")
+  }
+
+  @Test func encodingThenDecodingGivesTheSameLine() throws {
+    // Includes a repeated point (zero delta) and negative and positive steps in both axes.
+    let points = [
+      LatLng(lat: 19.43261, lng: -99.13321), LatLng(lat: 19.43261, lng: -99.13321),
+      LatLng(lat: 19.45502, lng: -99.20498), LatLng(lat: 19.39999, lng: -99.01234),
+      LatLng(lat: -33.86882, lng: 151.20929),
+    ]
+    #expect(try PolylineCodec.decode(PolylineCodec.encode(points)) == points)
+  }
+
+  @Test func anEmptyLineEncodesToAnEmptyString() {
+    #expect(PolylineCodec.encode([]) == "")
+  }
+
+  @Test func encodingRoundsToFiveDecimals() throws {
+    let rounded = try PolylineCodec.decode(
+      PolylineCodec.encode([LatLng(lat: 19.4326077, lng: -99.1332080)]))
+    #expect(rounded == [LatLng(lat: 19.43261, lng: -99.13321)])
+  }
 }
