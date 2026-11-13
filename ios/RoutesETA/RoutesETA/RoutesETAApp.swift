@@ -39,7 +39,10 @@ struct RoutesETAApp: App {
       // Lines are cached on the device, so only new or edited routes cost a Google call.
       routePreview = CachedRoutePreviewService(
         wrapping: GoogleRoutePreviewService(client: google), cache: Self.lineCache())
-      etaService = GoogleETAService(client: google, repository: configRepository)
+      // A selected route's ETA is remembered for a couple of minutes, so selecting it again
+      // right away doesn't ask Google again.
+      etaService = CachedETAService(
+        wrapping: GoogleETAService(client: google, repository: configRepository))
     }
 
     if useMocks {

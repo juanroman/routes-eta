@@ -41,7 +41,8 @@ struct CommuteLinesModelTests {
     func preview(origin: LatLng, destination: LatLng, via: [LatLng]) async throws -> RoutePreview {
       await gate?.wait()
       if failing.contains(via.count) { throw Failure() }
-      return RoutePreview(distanceMeters: 1000, polyline: [origin] + via + [destination])
+      return RoutePreview(
+        distanceMeters: 1000 + via.count, polyline: [origin] + via + [destination])
     }
   }
 
@@ -66,6 +67,16 @@ struct CommuteLinesModelTests {
     #expect(!model.isLoading)
   }
 
+  @Test func eachRoutesDistanceIsKeptByIndex() async {
+    let service = Service()
+    await service.configure(failing: [1])
+    let model = CommuteLinesModel(service: service)
+    await model.load(origin: origin, destination: destination, vias: [[], [stop], [stop, stop]])
+
+    // The route that failed has no line and so no distance either.
+    #expect(model.distances == [0: 1000, 2: 1002])
+  }
+
   @Test func withoutBothEndpointsThereAreNoLines() async {
     let model = CommuteLinesModel(service: Service())
     await model.load(origin: origin, destination: destination, vias: [[]])
@@ -73,6 +84,7 @@ struct CommuteLinesModelTests {
 
     await model.load(origin: origin, destination: nil, vias: [[]])
     #expect(model.lines.isEmpty)
+    #expect(model.distances.isEmpty)
     #expect(model.failedCount == 0)
   }
 

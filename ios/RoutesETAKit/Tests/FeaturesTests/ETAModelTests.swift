@@ -90,6 +90,9 @@ struct ETAFailureMessageTests {
   struct Failing: ETAService {
     let error: any Error
     func run(commute: String) async throws -> ETAReport { throw error }
+    func minutes(
+      for route: RouteDef, from origin: LatLng, to destination: LatLng
+    ) async throws -> Int { throw error }
   }
 
   @Test func actionableErrorsReachTheSheet() async {

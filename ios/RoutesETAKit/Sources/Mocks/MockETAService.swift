@@ -22,6 +22,17 @@ public struct MockETAService: ETAService {
     return ETAReport(commute: name, results: commute.routes.map(Self.eta(for:)))
   }
 
+  public func minutes(
+    for route: RouteDef, from origin: LatLng, to destination: LatLng
+  ) async throws -> Int {
+    guard let minutes = Self.eta(for: route).minutes else { throw RouteFailure() }
+    return minutes
+  }
+
+  private struct RouteFailure: LocalizedError {
+    var errorDescription: String? { "Couldn't fetch this route" }
+  }
+
   static func eta(for route: RouteDef) -> RouteETA {
     if route.name.localizedCaseInsensitiveContains("fail") {
       return RouteETA(name: route.name, minutes: nil, error: "Couldn't fetch this route")

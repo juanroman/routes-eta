@@ -24,6 +24,7 @@ struct CommuteMapScreen: View {
   }
 
   @State private var lines: CommuteLinesModel
+  @State private var selectedETA: SelectedRouteETAModel
   @State private var selectedRoute: String?
   @State private var retries = 0
   @State private var picking: Endpoint?
@@ -49,6 +50,7 @@ struct CommuteMapScreen: View {
     self.showsSchedules = showsSchedules
     self.commuteID = commuteID
     _lines = State(initialValue: CommuteLinesModel(service: routePreview))
+    _selectedETA = State(initialValue: SelectedRouteETAModel(service: etaService))
   }
 
   var body: some View {
@@ -94,25 +96,15 @@ struct CommuteMapScreen: View {
         }
       }
     }
-    .task(id: LinesKey(commute: commute, retries: retries)) {
+    .task(id: CommuteLinesKey(commute: commute, retries: retries)) {
       await lines.load(
         origin: commute.origin?.latLng, destination: commute.destination?.latLng,
         vias: commute.routes.map(\.via))
     }
-  }
-
-  /// What the lines depend on; `.task(id:)` reloads (cancelling a load in flight) when it changes.
-  private struct LinesKey: Hashable {
-    var origin: NamedPoint?
-    var destination: NamedPoint?
-    var vias: [[LatLng]]
-    var retries: Int
-
-    init(commute: Commute, retries: Int) {
-      origin = commute.origin
-      destination = commute.destination
-      vias = commute.routes.map(\.via)
-      self.retries = retries
+    .task(id: SelectedRouteETAKey(commute: commute, selected: selectedRoute)) {
+      await selectedETA.load(
+        route: commute.routes.first { $0.name == selectedRoute },
+        origin: commute.origin?.latLng, destination: commute.destination?.latLng)
     }
   }
 
@@ -182,7 +174,8 @@ struct CommuteMapScreen: View {
 
       RoutesSection(
         store: store, router: router, commuteID: commuteID, routes: commute.routes,
-        selected: $selectedRoute, pendingDelete: $pendingRouteDelete,
+        distances: lines.distances, selectedETA: selectedETA.state, selected: $selectedRoute,
+        pendingDelete: $pendingRouteDelete,
         errorMessage: $errorMessage, onAdd: { Task { await addRoute() } })
 
       if showsSchedules {

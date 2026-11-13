@@ -11,6 +11,8 @@ import Observation
 final class CommuteLinesModel {
   /// By route index.
   private(set) var lines: [Int: [LatLng]] = [:]
+  /// Each route's length in meters, by route index; comes with the line, so it costs nothing.
+  private(set) var distances: [Int: Int] = [:]
   /// Routes whose line couldn't be drawn in the last load.
   private(set) var failedCount = 0
   private(set) var isLoading = false
@@ -25,13 +27,14 @@ final class CommuteLinesModel {
   func load(origin: LatLng?, destination: LatLng?, vias: [[LatLng]]) async {
     guard let origin, let destination else {
       lines = [:]
+      distances = [:]
       failedCount = 0
       isLoading = false
       return
     }
     isLoading = true
     let service = service
-    let loaded = await withTaskGroup(of: (Int, [LatLng])?.self) { group in
+    let loaded = await withTaskGroup(of: (Int, RoutePreview)?.self) { group in
       for (index, via) in vias.enumerated() {
         group.addTask {
           guard
@@ -39,10 +42,10 @@ final class CommuteLinesModel {
               origin: origin, destination: destination, via: via),
             preview.polyline.count > 1
           else { return nil }
-          return (index, preview.polyline)
+          return (index, preview)
         }
       }
-      var result: [Int: [LatLng]] = [:]
+      var result: [Int: RoutePreview] = [:]
       for await entry in group {
         if let entry { result[entry.0] = entry.1 }
       }
@@ -50,7 +53,8 @@ final class CommuteLinesModel {
     }
     // A newer load owns the state now (it already set `isLoading`); leave it be.
     guard !Task.isCancelled else { return }
-    lines = loaded
+    lines = loaded.mapValues(\.polyline)
+    distances = loaded.mapValues(\.distanceMeters)
     failedCount = vias.count - loaded.count
     isLoading = false
   }

@@ -93,4 +93,38 @@ final class CommuteMapUITests: XCTestCase {
     app.buttons["Done"].tap()
     XCTAssertTrue(app.buttons["endpoint-From"].waitForNonExistence(timeout: 5))
   }
+
+  /// Waits until the element's accessibility value matches.
+  private func waitForValue(
+    of element: XCUIElement, matching format: String, file: StaticString = #filePath,
+    line: UInt = #line
+  ) {
+    let result = XCTWaiter().wait(
+      for: [expectation(for: NSPredicate(format: format), evaluatedWith: element)], timeout: 10)
+    XCTAssertEqual(result, .completed, file: file, line: line)
+  }
+
+  func testRoutesShowTheirDistanceAndTheSelectedOneItsETA() throws {
+    let app = openWorkToHome()
+    let city = app.buttons["City"]
+    let mordor = app.buttons["Mordor"]
+    let hasDistance = "value CONTAINS 'km' OR value CONTAINS 'mi'"
+
+    // Every route shows how long it is once its line has loaded (km or mi, per the locale).
+    waitForValue(of: city, matching: hasDistance)
+    waitForValue(of: mordor, matching: hasDistance)
+    XCTAssertFalse((mordor.value as? String ?? "").contains("min"))
+
+    // Selecting a route adds its ETA to that row only.
+    mordor.tap()
+    waitForValue(of: mordor, matching: "value CONTAINS ' min'")
+    XCTAssertFalse((city.value as? String ?? "").contains(" min"))
+
+    // Selecting another moves the ETA along; clearing the selection drops it.
+    city.tap()
+    waitForValue(of: city, matching: "value CONTAINS ' min'")
+    XCTAssertFalse((mordor.value as? String ?? "").contains(" min"))
+    city.tap()
+    waitForValue(of: city, matching: "NOT (value CONTAINS ' min')")
+  }
 }

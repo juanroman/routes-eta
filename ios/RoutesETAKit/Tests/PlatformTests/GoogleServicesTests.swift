@@ -53,6 +53,21 @@ struct GoogleServicesTests {
     #expect(report.message == "C: Direct 30 · Scenic 28")
   }
 
+  @Test func oneRoutesMinutesAreRoundedLikeTheReport() async throws {
+    let service = GoogleETAService(client: serviceClient(), repository: repository(routes: []))
+    let scenic = RouteDef(name: "Scenic", color: "#111111", via: via(2))
+    let minutes = try await service.minutes(for: scenic, from: work.latLng, to: home.latLng)
+    #expect(minutes == 28)  // 1710s = 28.5 -> 28, the same as in the full report
+  }
+
+  @Test func oneRoutesFailureIsThrownForTheCallerToShow() async {
+    let service = GoogleETAService(client: serviceClient(), repository: repository(routes: []))
+    let broken = RouteDef(name: "Broken", color: "#111111", via: via(1))
+    await #expect(throws: GoogleRoutesError.self) {
+      try await service.minutes(for: broken, from: work.latLng, to: home.latLng)
+    }
+  }
+
   @Test func oneFailingRouteDoesNotSinkTheOthers() async throws {
     let routes = [
       RouteDef(name: "Direct", color: "#000000"),
