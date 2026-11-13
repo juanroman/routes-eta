@@ -6,6 +6,7 @@ struct CommutesListView: View {
   let router: AppRouter
   let placeSearch: any PlaceSearchService
   let savedPlaces: SavedPlacesStore
+  let location: any LocationProvider
 
   @State private var isAdding = false
   /// The commute the form just created. It is opened once the form has finished closing:
@@ -93,6 +94,8 @@ struct CommutesListView: View {
       .onMove { source, destination in
         Task { errorMessage = await store.moveCommute(from: source, to: destination) }
       }
+      // With one commute there is nothing for location to choose between.
+      if store.entries.count > 1 { LocationSettingSection(location: location) }
     }
     .overlay {
       if store.entries.isEmpty {

@@ -13,14 +13,19 @@ struct RoutesETAApp: App {
   private let placeSearch: any PlaceSearchService
   private let etaService: any ETAService
   private let routePreview: any RoutePreviewService
+  private let location: any LocationProvider
+  private let recents: any RecentCommutesRepository
+  private let locationPrompt: any LocationPromptRepository
   private let showsSchedules: Bool
 
   /// Standalone app: commutes are saved on the device (a JSON file), place search
   /// is MapKit, and route lines and ETAs come straight from Google's Routes API
   /// (the key is read from the git-ignored `Secrets.plist`; see `ios/README.md`).
   /// `-mock-services` (UI tests) swaps everything for offline, in-memory, seeded
-  /// doubles so each run starts from a clean slate. `-show-schedules` reveals the
-  /// schedule editor, which is hidden by default (see `CommuteDetailView`).
+  /// doubles so each run starts from a clean slate; there the user's location is
+  /// `-mock-location home|work|far` (default: location denied, so no prompt appears) and
+  /// `-mock-location-prompt` makes the permission still undecided. `-show-schedules` reveals
+  /// the schedule editor, which is hidden by default (see `CommuteDetailView`).
   init() {
     let arguments = CommandLine.arguments
     let useMocks = arguments.contains("-mock-services")
@@ -46,6 +51,17 @@ struct RoutesETAApp: App {
     }
 
     if useMocks {
+      location = Self.mockLocation(arguments)
+      recents = InMemoryRecentCommutesRepository()
+      locationPrompt = InMemoryLocationPromptRepository()
+    } else {
+      // Where the user is only picks which commute Home shows; it never leaves the device.
+      location = CoreLocationProvider()
+      recents = UserDefaultsRecentCommutesRepository()
+      locationPrompt = UserDefaultsLocationPromptRepository()
+    }
+
+    if useMocks {
       placeSearch = MockPlaceSearchService()
       _savedPlaces = State(
         initialValue: SavedPlacesStore(repository: InMemorySavedPlacesRepository()))
@@ -60,9 +76,25 @@ struct RoutesETAApp: App {
     WindowGroup {
       RootView(
         store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-        routePreview: routePreview, etaService: etaService,
-        showsSchedules: showsSchedules)
+        routePreview: routePreview, etaService: etaService, location: location,
+        recents: recents, locationPrompt: locationPrompt, showsSchedules: showsSchedules)
     }
+  }
+
+  private static func mockLocation(_ arguments: [String]) -> any LocationProvider {
+    let place = arguments.firstIndex(of: "-mock-location")
+      .flatMap { arguments.indices.contains($0 + 1) ? arguments[$0 + 1] : nil }
+    let point: LatLng? =
+      switch place {
+      case "home": SampleData.home.latLng
+      case "work": SampleData.work.latLng
+      case "far": LatLng(lat: 40.4168, lng: -3.7038)  // Madrid: near none of the sample commutes
+      default: nil
+      }
+    let authorization: LocationAuthorization =
+      arguments.contains("-mock-location-prompt")
+      ? .notDetermined : (point == nil ? .denied : .authorized)
+    return FixedLocationProvider(authorization: authorization, location: point)
   }
 
   private static func lineCache() -> FileRouteLineCache {

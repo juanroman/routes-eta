@@ -7,15 +7,28 @@ import Testing
 
 struct CoreLocationProviderTests {
   @Test @MainActor func everySystemStatusMapsToOneOfOurs() {
-    let map = CoreLocationProvider.authorization(from:)
+    func map(_ status: CLAuthorizationStatus, _ accuracy: CLAccuracyAuthorization = .fullAccuracy)
+      -> LocationAuthorization
+    {
+      CoreLocationProvider.authorization(from: status, accuracy: accuracy)
+    }
     #expect(map(.notDetermined) == .notDetermined)
     #expect(map(.authorizedAlways) == .authorized)
+    #expect(map(.denied) == .denied)
+    #expect(map(.restricted) == .denied)
     #if os(iOS)
       // Doesn't exist on macOS, where `swift test` runs; the app only runs on iOS.
       #expect(map(.authorizedWhenInUse) == .authorized)
     #endif
-    #expect(map(.denied) == .denied)
-    #expect(map(.restricted) == .denied)
+  }
+
+  @Test @MainActor func approximateLocationIsItsOwnState() {
+    let map = CoreLocationProvider.authorization(from:accuracy:)
+    #expect(map(.authorizedAlways, .reducedAccuracy) == .reducedAccuracy)
+    #expect(map(.authorizedAlways, .fullAccuracy) == .authorized)
+    // Accuracy only matters once the user has allowed location at all.
+    #expect(map(.denied, .reducedAccuracy) == .denied)
+    #expect(map(.notDetermined, .reducedAccuracy) == .notDetermined)
   }
 
   private let now = Date(timeIntervalSince1970: 1_000_000)
@@ -37,8 +50,14 @@ struct CoreLocationProviderTests {
   }
 
   @Test @MainActor func aVagueLocationIsNotUsable() {
-    #expect(!CoreLocationProvider.isUsable(location(accuracy: 1_500, secondsOld: 5), now: now))
-    #expect(CoreLocationProvider.isUsable(location(accuracy: 1_000, secondsOld: 5), now: now))
+    #expect(!CoreLocationProvider.isUsable(location(accuracy: 501, secondsOld: 5), now: now))
+    #expect(CoreLocationProvider.isUsable(location(accuracy: 500, secondsOld: 5), now: now))
+  }
+
+  @Test @MainActor func theSamePrecisionRuleAppliesToALiveFix() {
+    // `isPrecise` is what the live path uses; age doesn't matter for a fix that just arrived.
+    #expect(CoreLocationProvider.isPrecise(location(accuracy: 65, secondsOld: 9_999)))
+    #expect(!CoreLocationProvider.isPrecise(location(accuracy: 1_500, secondsOld: 0)))
   }
 
   @Test @MainActor func aNegativeAccuracyMeansTheLocationIsInvalid() {

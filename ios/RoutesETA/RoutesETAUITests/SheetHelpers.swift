@@ -1,6 +1,19 @@
 import XCTest
 
 extension XCUIApplication {
+  /// The app opens on Home (the ETAs). Most tests are about the commutes list, which is one tap
+  /// away behind "Edit".
+  @MainActor
+  func openCommutesList(file: StaticString = #filePath, line: UInt = #line) {
+    let edit = buttons["Edit"]
+    XCTAssertTrue(
+      edit.waitForExistence(timeout: 10), "Home never appeared", file: file, line: line)
+    edit.tap()
+    XCTAssertTrue(
+      navigationBars["Commutes"].waitForExistence(timeout: 5), "the commutes list did not open",
+      file: file, line: line)
+  }
+
   /// The commute screen's sheet starts small, showing only its title and the first rows; rows
   /// below that aren't on screen (and so aren't reachable) until it is pulled up. Always
   /// pulls it all the way up: a partly visible row (like Show ETAs at the small detent) is
