@@ -37,3 +37,24 @@ extension View {
     #endif
   }
 }
+
+extension View {
+  /// The big title style (a sheet's header); a no-op on the macOS test host.
+  func largeNavigationTitle() -> some View {
+    #if os(iOS)
+      navigationBarTitleDisplayMode(.large)
+    #else
+      self
+    #endif
+  }
+
+  /// Keeps the title (it still labels the back button of screens pushed on top) but doesn't
+  /// draw it, for screens whose sheet already shows it big.
+  func hidingNavigationTitle() -> some View {
+    #if os(iOS)
+      toolbar(removing: .title)
+    #else
+      self
+    #endif
+  }
+}

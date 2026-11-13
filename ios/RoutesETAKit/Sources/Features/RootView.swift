@@ -31,9 +31,10 @@ public struct RootView: View {
         .navigationDestination(for: AppRoute.self) { route in
           switch route {
           case .commute(let id):
-            CommuteDetailView(
+            CommuteMapScreen(
               store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-              etaService: etaService, showsSchedules: showsSchedules, commuteID: id)
+              etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
+              commuteID: id)
           case .routeEditor(let commuteID, let route):
             RouteEditorView(
               store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)

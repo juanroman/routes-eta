@@ -15,10 +15,12 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertTrue(commute.waitForExistence(timeout: 10))
     commute.tap()
 
-    XCTAssertTrue(app.buttons["Show ETAs"].waitForExistence(timeout: 5))
-    XCTAssertTrue(app.staticTexts["City"].exists)
+    // The sheet opens small, which leaves the back button uncovered (pulled all the way
+    // up it would cover it).
+    XCTAssertTrue(app.buttons["endpoint-From"].waitForExistence(timeout: 10))
+    XCTAssertTrue(app.navigationBars["Work to Home"].exists)
 
-    app.navigationBars.buttons.firstMatch.tap()
+    app.navigationBars.buttons["Commutes"].tap()
     XCTAssertTrue(app.navigationBars["Commutes"].waitForExistence(timeout: 5))
   }
 
@@ -117,8 +119,9 @@ final class RoutesETAUITests: XCTestCase {
     XCTAssertTrue(color.waitForExistence(timeout: 5))
     color.tap()
     app.navigationBars.buttons.firstMatch.tap()  // back; commits the name
+    app.expandCommuteSheet()
 
-    let row = app.staticTexts["Toll Road"]
+    let row = app.buttons["Toll Road"]
     XCTAssertTrue(row.waitForExistence(timeout: 5))
 
     // Delete asks first; Cancel keeps it, confirming removes it.
@@ -142,9 +145,9 @@ final class RoutesETAUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Home to Work"].tap()
+    app.expandCommuteSheet()
 
-    XCTAssertTrue(app.buttons["show-etas"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.staticTexts["Mon · 06:30"].exists)
+    XCTAssertFalse(app.buttons["schedule"].exists)
     XCTAssertFalse(app.staticTexts["Schedule"].exists)
   }
 
@@ -154,7 +157,8 @@ final class RoutesETAUITests: XCTestCase {
     app.launchArguments = ["-mock-services", "-show-schedules"]
     app.launch()
     app.staticTexts["Home to Work"].tap()
-    app.staticTexts["Mon · 06:30"].tap()
+    app.expandCommuteSheet()
+    app.buttons["schedule"].tap()
 
     // "Home to Work" has Mon (rule 1) and Tue-Fri (rule 2): rule 1 can't take Tue,
     // and Mon can't be switched off because it is rule 1's only day.
@@ -188,6 +192,7 @@ final class RoutesETAUITests: XCTestCase {
     app.launchArguments = ["-mock-services"]
     app.launch()
     app.staticTexts["Work to Home"].tap()
+    app.expandCommuteSheet()
 
     let button = app.buttons["show-etas"]
     XCTAssertTrue(button.waitForExistence(timeout: 5))
@@ -222,6 +227,7 @@ final class RoutesETAUITests: XCTestCase {
     field.typeText("Gym")
     app.alerts.buttons["Add"].tap()
     app.staticTexts["Gym"].tap()
+    app.expandCommuteSheet()
 
     XCTAssertFalse(app.buttons["show-etas"].isEnabled)
     XCTAssertTrue(app.staticTexts["Set origin and destination first"].exists)

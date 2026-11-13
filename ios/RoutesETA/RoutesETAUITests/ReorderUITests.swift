@@ -21,7 +21,8 @@ final class ReorderUITests: XCTestCase {
   func testRoutesCanBeReordered() throws {
     let app = launch()
     app.staticTexts["Work to Home"].tap()
-    XCTAssertTrue(app.staticTexts["City"].waitForExistence(timeout: 5))
+    app.expandCommuteSheet()
+    XCTAssertTrue(app.buttons["City"].waitForExistence(timeout: 5))
     XCTAssertTrue(routeIsAbove("City", "Mordor", in: app))
 
     app.buttons["Edit"].tap()
@@ -55,7 +56,7 @@ final class ReorderUITests: XCTestCase {
   }
 
   private func routeIsAbove(_ upper: String, _ lower: String, in app: XCUIApplication) -> Bool {
-    app.staticTexts[upper].frame.minY < app.staticTexts[lower].frame.minY
+    app.buttons[upper].frame.minY < app.buttons[lower].frame.minY
   }
 
   /// Drags a row's "Reorder …" handle (visible in edit mode) above another row's handle.
