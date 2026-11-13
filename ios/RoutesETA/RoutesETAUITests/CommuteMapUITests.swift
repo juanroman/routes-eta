@@ -14,6 +14,7 @@ final class CommuteMapUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Work to Home"].tap()
     if expanded {
       app.expandCommuteSheet()

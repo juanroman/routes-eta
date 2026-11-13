@@ -45,6 +45,7 @@ final class ReorderUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     XCTAssertTrue(app.staticTexts["Work to Home"].waitForExistence(timeout: 10))
     return app
   }

@@ -10,6 +10,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
 
     let commute = app.staticTexts["Work to Home"]
     XCTAssertTrue(commute.waitForExistence(timeout: 10))
@@ -29,6 +30,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
 
     let commute = app.staticTexts["Home to Work"]
     XCTAssertTrue(commute.waitForExistence(timeout: 10))
@@ -52,6 +54,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
 
     app.staticTexts["Work to Home"].tap()
 
@@ -84,6 +87,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Work to Home"].tap()
     app.buttons["Edit"].tap()  // the places only show while editing
 
@@ -109,6 +113,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Home to Work"].tap()
 
     // Adding opens the new route's editor.
@@ -148,6 +153,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Home to Work"].tap()
     app.expandCommuteSheet()
 
@@ -160,6 +166,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services", "-show-schedules"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Home to Work"].tap()
     app.expandCommuteSheet()
     app.buttons["schedule"].tap()
@@ -195,6 +202,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Work to Home"].tap()
     app.expandCommuteSheet()
 
@@ -224,6 +232,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.staticTexts["Home to Work"].tap()
     app.expandCommuteSheet()
 

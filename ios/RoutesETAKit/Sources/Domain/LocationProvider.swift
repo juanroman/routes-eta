@@ -4,6 +4,9 @@ public enum LocationAuthorization: Equatable, Sendable {
   /// Refused, or restricted (parental controls, an MDM profile): either way, don't ask again.
   case denied
   case authorized
+  /// Allowed, but the user turned Precise Location off, so iOS only reports an area several
+  /// kilometers wide. That can't tell which origin is nearby, so it counts as having no location.
+  case reducedAccuracy
 }
 
 /// Where the user is, so the Home view can show the commute that starts nearby.

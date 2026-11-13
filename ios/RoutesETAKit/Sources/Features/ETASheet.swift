@@ -46,10 +46,7 @@ struct ETASheet: View {
   private func results(_ report: ETAReport, fetchedAt: Date) -> some View {
     ScrollView {
       VStack(spacing: 12) {
-        ForEach(report.results, id: \.name) { result in
-          chip(
-            result, isFastest: result.name == report.fastestRouteName && report.results.count > 1)
-        }
+        ETAResultsView(commute: commute, report: report)
         Text("Updated \(fetchedAt.formatted(date: .omitted, time: .shortened))")
           .font(.footnote).foregroundStyle(.secondary).padding(.top, 4)
         Button("Refresh", systemImage: "arrow.clockwise") { Task { await model.load() } }
@@ -58,25 +55,6 @@ struct ETASheet: View {
       .padding()
     }
     .accessibilityIdentifier("eta-results")
-  }
-
-  private func chip(_ result: RouteETA, isFastest: Bool) -> some View {
-    let color =
-      commute.routes.first { $0.name == result.name }.map { Color(hex: $0.color) } ?? .gray
-    return HStack {
-      Circle().fill(color).frame(width: 14, height: 14)
-      VStack(alignment: .leading, spacing: 2) {
-        Text(result.name).font(.headline)
-        if isFastest { Text("Fastest").font(.caption).foregroundStyle(.green) }
-        if let error = result.error { Text(error).font(.caption).foregroundStyle(.secondary) }
-      }
-      Spacer()
-      Text(result.minutes.map { "\($0) min" } ?? "?").font(.title2.bold())
-    }
-    .padding()
-    .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 14))
-    .accessibilityElement(children: .combine)
-    .accessibilityIdentifier("eta-\(result.name)")
   }
 
   private func failure(_ message: String, detail: String? = nil) -> some View {

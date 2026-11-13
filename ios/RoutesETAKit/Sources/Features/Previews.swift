@@ -1,4 +1,5 @@
 #if DEBUG
+  import Domain
   import Mocks
   import SwiftUI
 
@@ -11,8 +12,11 @@
       placeSearch: MockPlaceSearchService(),
       savedPlaces: SavedPlacesStore(repository: InMemorySavedPlacesRepository()),
       routePreview: MockRoutePreviewService(),
-      etaService: MockETAService(repository: repository))
+      etaService: MockETAService(repository: repository),
+      location: FixedLocationProvider(authorization: .authorized, location: SampleData.home.latLng),
+      recents: InMemoryRecentCommutesRepository(),
+      locationPrompt: InMemoryLocationPromptRepository())
   }
 
-  #Preview("Commutes") { previewRoot() }
+  #Preview("Home") { previewRoot() }
 #endif

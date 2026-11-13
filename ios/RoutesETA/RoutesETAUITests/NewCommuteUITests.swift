@@ -11,6 +11,7 @@ final class NewCommuteUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
+    app.openCommutesList()
     app.buttons["Add Commute"].tap()
     XCTAssertTrue(app.textFields["commute-name"].waitForExistence(timeout: 10))
     return app
