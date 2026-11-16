@@ -2,10 +2,10 @@ import Domain
 import MapKit
 import SwiftUI
 
-/// One commute: its routes on a full-bleed map, with the trip, the routes and "Show ETAs"
+/// One commute: its routes on a full-bleed map, with the trip and the routes
 /// in the persistent sheet over it (see `MapSheetScaffold`). The map is read-only: tap a
 /// route (on the map or in the list) to find it, and open the route editor to move its
-/// via points. ETAs are a companion, fetched only when asked for.
+/// via points. The commute's ETAs are Home's job; here only the selected route shows its own.
 struct CommuteMapScreen: View {
   let store: ConfigStore
   let router: AppRouter
@@ -32,7 +32,6 @@ struct CommuteMapScreen: View {
   @State private var isConfirmingDelete = false
   @State private var draftName = ""
   @State private var errorMessage: String?
-  @State private var isShowingETAs = false
   @State private var isEditing = false
   @State private var pendingRouteDelete: Int?
   @Environment(\.dismiss) private var dismiss
@@ -187,23 +186,14 @@ struct CommuteMapScreen: View {
           }
         }
       }
-
-      Section {
-        Button("Show ETAs", systemImage: "clock") { isShowingETAs = true }
-          .disabled(commute.etaBlocker != nil)
-          .accessibilityIdentifier("show-etas")
-      } footer: {
-        if let blocker = commute.etaBlocker { Text(blocker) }
-      }
     }
   }
 
-  /// The picker and ETA sheets and the rename/delete/error alerts. They hang off the
+  /// The picker sheet and the rename/delete/error alerts. They hang off the
   /// sheet's content, not the screen behind it: something presented from a view that is
   /// already presenting a sheet is not shown.
   private func presentations(for commute: Commute, on view: some View) -> some View {
     view
-      .sheet(isPresented: $isShowingETAs) { ETASheet(commute: commute, service: etaService) }
       .sheet(item: $picking) { endpoint in
         PlacePickerView(
           title: endpoint.rawValue,

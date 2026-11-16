@@ -10,17 +10,21 @@ final class ReorderUITests: XCTestCase {
 
   func testCommutesCanBeReordered() throws {
     let app = launch()
-    XCTAssertEqual(commuteTitles(in: app), ["Work to Home", "Home to Work"])
+    XCTAssertEqual(selectorOrder(in: app), ["Work to Home", "Home to Work"])
 
-    app.buttons["Edit"].tap()
+    app.chooseFromHomeMenu("home-manage")
+    XCTAssertEqual(commuteTitles(in: app), ["Work to Home", "Home to Work"])
     dragRow(1, aboveRow: 0, in: app)
-    app.buttons["Done"].tap()
     XCTAssertEqual(commuteTitles(in: app), ["Home to Work", "Work to Home"])
+    app.buttons["Done"].tap()
+    // Home's selector follows the new order.
+    XCTAssertTrue(app.buttons["home-more"].waitForExistence(timeout: 5))
+    XCTAssertEqual(selectorOrder(in: app), ["Home to Work", "Work to Home"])
   }
 
   func testRoutesCanBeReordered() throws {
     let app = launch()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     app.expandCommuteSheet()
     XCTAssertTrue(app.buttons["City"].waitForExistence(timeout: 5))
     XCTAssertTrue(routeIsAbove("City", "Mordor", in: app))
@@ -34,8 +38,7 @@ final class ReorderUITests: XCTestCase {
   /// Edit isn't only for reordering: it also shows the places, so it is there with one route.
   func testEditIsAvailableEvenWithOneRoute() throws {
     let app = launch()
-    app.staticTexts["Home to Work"].tap()  // one route only
-    XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 5))
+    app.openCommute("Home to Work")  // one route only
     XCTAssertTrue(app.buttons["Edit"].exists)
   }
 
@@ -45,12 +48,19 @@ final class ReorderUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    XCTAssertTrue(app.staticTexts["Work to Home"].waitForExistence(timeout: 10))
+    XCTAssertTrue(app.buttons["home-more"].waitForExistence(timeout: 10))
     return app
   }
 
-  /// Titles of the commute rows, top to bottom.
+  /// The commutes in Home's selector, left to right.
+  private func selectorOrder(in app: XCUIApplication) -> [String] {
+    let buttons = app.segmentedControls["home-selector"].buttons
+    return ["Work to Home", "Home to Work"]
+      .filter { buttons[$0].exists }
+      .sorted { buttons[$0].frame.minX < buttons[$1].frame.minX }
+  }
+
+  /// Titles of the commute rows in Manage Commutes, top to bottom.
   private func commuteTitles(in app: XCUIApplication) -> [String] {
     ["Work to Home", "Home to Work"]
       .filter { app.staticTexts[$0].exists }

@@ -11,8 +11,7 @@ final class RouteMapUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     app.expandCommuteSheet()
     app.buttons["edit-route-Mordor"].tap()  // a direct route: a straight line, no via points
 
@@ -56,8 +55,7 @@ final class RouteMapUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     app.expandCommuteSheet()
     app.buttons["edit-route-Mordor"].tap()  // a direct route: a straight line, no via points
 
@@ -90,8 +88,7 @@ final class RouteMapUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     app.expandCommuteSheet()
     app.buttons["edit-route-City"].tap()
     XCTAssertTrue(app.maps.firstMatch.waitForExistence(timeout: 10))

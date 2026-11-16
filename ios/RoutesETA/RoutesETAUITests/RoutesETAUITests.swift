@@ -10,43 +10,37 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-
-    let commute = app.staticTexts["Work to Home"]
-    XCTAssertTrue(commute.waitForExistence(timeout: 10))
-    commute.tap()
-
     // The sheet opens small, which leaves the back button uncovered (pulled all the way
     // up it would cover it).
-    XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 10))
+    app.openCommute("Work to Home")
     XCTAssertTrue(app.navigationBars["Work to Home"].exists)
 
-    app.navigationBars.buttons["Commutes"].tap()
-    XCTAssertTrue(app.navigationBars["Commutes"].waitForExistence(timeout: 5))
+    app.navigationBars.buttons["ETAs"].tap()
+    XCTAssertTrue(app.navigationBars["ETAs"].waitForExistence(timeout: 5))
   }
 
   @MainActor
-  func testDeleteAsksForConfirmation() throws {
+  func testDeleteAsksForConfirmationAndLeavesTheOtherCommuteOnHome() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-
-    let commute = app.staticTexts["Home to Work"]
-    XCTAssertTrue(commute.waitForExistence(timeout: 10))
-    commute.swipeLeft()
-    app.buttons["Delete"].tap()
+    app.openCommute("Home to Work")
 
     // Cancelling keeps the commute.
+    app.buttons["More"].tap()
+    app.buttons["Delete"].tap()
     XCTAssertTrue(app.buttons["Delete Commute"].waitForExistence(timeout: 5))
     app.buttons["Cancel"].tap()
-    XCTAssertTrue(commute.waitForExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["Home to Work"].exists)
 
-    // Confirming removes it.
-    commute.swipeLeft()
+    // Confirming removes it and returns to Home, which now shows the one that is left.
+    app.buttons["More"].tap()
     app.buttons["Delete"].tap()
     app.buttons["Delete Commute"].tap()
-    XCTAssertTrue(commute.waitForNonExistence(timeout: 5))
+    XCTAssertTrue(app.navigationBars["ETAs"].waitForExistence(timeout: 5))
+    let eta = app.descendants(matching: .any)["eta-Mordor"]
+    XCTAssertTrue(eta.waitForExistence(timeout: 10))
+    XCTAssertFalse(app.segmentedControls["home-selector"].buttons["Home to Work"].exists)
   }
 
   @MainActor
@@ -54,9 +48,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
 
     // The places only show while editing.
     app.buttons["Edit"].tap()
@@ -87,8 +79,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     app.buttons["Edit"].tap()  // the places only show while editing
 
     // First use: Home is unset, so tapping it asks for an address.
@@ -113,8 +104,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Home to Work"].tap()
+    app.openCommute("Home to Work")
 
     // Adding opens the new route's editor.
     app.buttons["add-route"].tap()
@@ -153,8 +143,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Home to Work"].tap()
+    app.openCommute("Home to Work")
     app.expandCommuteSheet()
 
     XCTAssertFalse(app.buttons["schedule"].exists)
@@ -166,8 +155,7 @@ final class RoutesETAUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services", "-show-schedules"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Home to Work"].tap()
+    app.openCommute("Home to Work")
     app.expandCommuteSheet()
     app.buttons["schedule"].tap()
 
@@ -195,60 +183,6 @@ final class RoutesETAUITests: XCTestCase {
     app.buttons.matching(identifier: "Delete Rule").element(boundBy: 2).tap()
     app.alerts.buttons["Delete Rule"].tap()
     XCTAssertTrue(app.buttons["day-2-Sat"].waitForNonExistence(timeout: 5))
-  }
-
-  @MainActor
-  func testShowETAsListsEachRouteAndCanBeRefreshed() throws {
-    let app = XCUIApplication()
-    app.launchArguments = ["-mock-services"]
-    app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
-    app.expandCommuteSheet()
-
-    let button = app.buttons["show-etas"]
-    XCTAssertTrue(button.waitForExistence(timeout: 5))
-    XCTAssertTrue(button.isEnabled)
-    button.tap()
-
-    // One chip per route, in the commute's order, each with minutes.
-    let city = app.descendants(matching: .any)["eta-City"]
-    XCTAssertTrue(city.waitForExistence(timeout: 10))
-    XCTAssertTrue(city.label.contains("min"))
-    let mordor = app.descendants(matching: .any)["eta-Mordor"]
-    XCTAssertTrue(mordor.exists)
-    // Exactly one of the two chips is marked as the quickest.
-    XCTAssertNotEqual(city.label.contains("Fastest"), mordor.label.contains("Fastest"))
-
-    // Google's credit rides along with the numbers it describes.
-    let credit = app.descendants(matching: .any)["google-attribution"]
-    XCTAssertTrue(credit.exists)
-    XCTAssertEqual(credit.label, "Google Maps")
-
-    app.buttons["eta-refresh"].tap()
-    XCTAssertTrue(app.descendants(matching: .any)["eta-City"].waitForExistence(timeout: 10))
-
-    app.buttons["Done"].tap()
-    XCTAssertTrue(button.waitForExistence(timeout: 5))
-  }
-
-  @MainActor
-  func testShowETAsIsDisabledUntilTheCommuteHasARoute() throws {
-    let app = XCUIApplication()
-    app.launchArguments = ["-mock-services"]
-    app.launch()
-    app.openCommutesList()
-    app.staticTexts["Home to Work"].tap()
-    app.expandCommuteSheet()
-
-    // Remove its only route, which leaves the places but nothing to measure.
-    app.buttons["City"].swipeLeft()
-    app.buttons["Delete"].tap()
-    app.alerts.buttons["Delete Route"].tap()
-
-    // The route is removed asynchronously: wait for the explanation to show up first.
-    XCTAssertTrue(app.staticTexts["Add a route first"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.buttons["show-etas"].isEnabled)
   }
 
   private func waitForLabel(

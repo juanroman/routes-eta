@@ -14,8 +14,7 @@ final class CommuteMapUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.staticTexts["Work to Home"].tap()
+    app.openCommute("Work to Home")
     if expanded {
       app.expandCommuteSheet()
     } else {
@@ -47,19 +46,11 @@ final class CommuteMapUITests: XCTestCase {
     app.buttons["edit-route-City"].tap()
     XCTAssertTrue(app.textFields["route-name"].waitForExistence(timeout: 5))
     // The sheet belongs to the commute screen and must not cover the editor.
-    XCTAssertFalse(app.buttons["show-etas"].exists)
+    XCTAssertFalse(app.buttons["add-route"].exists)
 
     app.navigationBars.buttons.firstMatch.tap()
-    XCTAssertTrue(app.buttons["show-etas"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 5))
     XCTAssertTrue(app.buttons["City"].exists)
-  }
-
-  func testTheETAsOpenOverTheSheet() throws {
-    let app = openWorkToHome()
-    app.buttons["show-etas"].tap()
-    XCTAssertTrue(app.descendants(matching: .any)["eta-City"].waitForExistence(timeout: 10))
-    app.buttons["Done"].tap()
-    XCTAssertTrue(app.buttons["show-etas"].waitForExistence(timeout: 5))
   }
 
   /// "Work to Home" has one direct route (Mordor) and one through a via point (City), so
@@ -71,7 +62,7 @@ final class CommuteMapUITests: XCTestCase {
     sleep(2)  // let the lines load and the camera settle
 
     let window = app.windows.firstMatch.frame
-    let top = app.navigationBars.buttons["Commutes"].frame.maxY
+    let top = app.navigationBars.buttons["ETAs"].frame.maxY
     let uncoveredBottom = window.height - 270  // the sheet's small detent
     let centre = CGVector(dx: 0.5, dy: (top + (uncoveredBottom - top) / 2) / window.height)
     app.windows.firstMatch.coordinate(withNormalizedOffset: centre).tap()

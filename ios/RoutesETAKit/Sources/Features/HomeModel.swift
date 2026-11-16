@@ -38,8 +38,8 @@ final class HomeModel {
 
   /// The commute as it was when fetched, to notice that it was edited meanwhile.
   private var shownCommute: Commute?
-  /// The location permission when the commute was chosen: if it changes (turned on from the Edit
-  /// screen, or in Settings) the choice is made again even when the ETAs are fresh.
+  /// The location permission when the commute was chosen: if it changes (turned on from Manage
+  /// Commutes, or in Settings) the choice is made again even when the ETAs are fresh.
   private var chosenWith: LocationAuthorization?
   private var isOpening = false
   private var loading: Task<Void, Never>?

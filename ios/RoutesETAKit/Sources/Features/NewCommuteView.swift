@@ -3,7 +3,8 @@ import SwiftUI
 
 /// The form behind "Add Commute": a name and both places. The places are chosen here, once,
 /// so a commute never exists without something to draw; afterwards they only show up when
-/// you press Edit on the commute. Add stays disabled until the name and both places are set.
+/// you press Edit in the commute's sheet. Add stays disabled until the name and both places
+/// are set.
 struct NewCommuteView: View {
   let store: ConfigStore
   let placeSearch: any PlaceSearchService

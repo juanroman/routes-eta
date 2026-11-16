@@ -76,6 +76,18 @@ extension View {
   }
 }
 
+extension View {
+  /// Keeps the lists inside in reorder mode, for screens that exist to reorder. `EditMode`
+  /// doesn't exist on the macOS test host, where this does nothing.
+  func alwaysReordering() -> some View {
+    #if os(iOS)
+      environment(\.editMode, .constant(.active))
+    #else
+      self
+    #endif
+  }
+}
+
 /// Shows its content only while the list it sits in is in edit mode. It reads the live edit
 /// mode itself instead of taking a flag: content built once for a sheet doesn't see later
 /// changes to the screen's own state, but the environment is always current.
