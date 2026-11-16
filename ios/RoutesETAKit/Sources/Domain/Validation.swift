@@ -17,19 +17,19 @@ public enum ConfigIssue: Hashable, Sendable, CustomStringConvertible {
   public var description: String {
     switch self {
     case .emptyCommuteName:
-      "A commute needs a name."
+      String(localized: "A commute needs a name.")
     case .duplicateCommuteName(let name):
-      "There is already a commute named \"\(name)\"."
+      String(localized: "There is already a commute named \"\(name)\".")
     case .emptyRouteName(let commute):
-      "A route in \"\(commute)\" needs a name."
+      String(localized: "A route in \"\(commute)\" needs a name.")
     case .duplicateRouteName(_, let route):
-      "There is already a route named \"\(route)\" in this commute."
+      String(localized: "There is already a route named \"\(route)\" in this commute.")
     case .invalidColor(_, let route):
-      "Route \"\(route)\" has an invalid color."
+      String(localized: "Route \"\(route)\" has an invalid color.")
     case .tooManyViaPoints(_, let route):
-      "Route \"\(route)\" has more than \(maxViaPoints) via points."
+      String(localized: "Route \"\(route)\" has more than \(maxViaPoints) via points.")
     case .invalidCoordinate(_, let what):
-      "\(what) has an invalid coordinate."
+      String(localized: "\(what) has an invalid coordinate.")
     }
   }
 }
@@ -53,10 +53,10 @@ extension Commute {
     var issues: [ConfigIssue] = []
     if name.trimmingCharacters(in: .whitespaces).isEmpty { issues.append(.emptyCommuteName) }
     if let origin, !origin.latLng.isValid {
-      issues.append(.invalidCoordinate(commute: name, what: "Origin"))
+      issues.append(.invalidCoordinate(commute: name, what: String(localized: "Origin")))
     }
     if let destination, !destination.latLng.isValid {
-      issues.append(.invalidCoordinate(commute: name, what: "Destination"))
+      issues.append(.invalidCoordinate(commute: name, what: String(localized: "Destination")))
     }
     return issues + routeIssues()
   }
@@ -77,7 +77,9 @@ extension Commute {
         issues.append(.tooManyViaPoints(commute: name, route: route.name))
       }
       if route.via.contains(where: { !$0.isValid }) {
-        issues.append(.invalidCoordinate(commute: name, what: "A via point of \"\(route.name)\""))
+        issues.append(
+          .invalidCoordinate(
+            commute: name, what: String(localized: "A via point of \"\(route.name)\"")))
       }
     }
     return issues

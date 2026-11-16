@@ -30,7 +30,7 @@ public struct MockETAService: ETAService {
   }
 
   private struct RouteFailure: LocalizedError {
-    var errorDescription: String? { "Couldn't fetch this route" }
+    var errorDescription: String? { String(localized: "Couldn't fetch this route") }
   }
 
   static func eta(for route: RouteDef) -> RouteETA {

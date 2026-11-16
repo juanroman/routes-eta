@@ -1,0 +1,1425 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "%@ has an invalid coordinate." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ tiene una coordenada no válida."
+          }
+        }
+      }
+    },
+    "%@ → %@ · %lld routes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ → %2$@ · %3$lld rutas"
+          }
+        }
+      }
+    },
+    "%@ → %@ · 1 route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@ → %2$@ · 1 ruta"
+          }
+        }
+      }
+    },
+    "%lld d ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld d"
+          }
+        }
+      }
+    },
+    "%lld days ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld días"
+          }
+        }
+      }
+    },
+    "%lld hours ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld horas"
+          }
+        }
+      }
+    },
+    "%lld hr ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld h"
+          }
+        }
+      }
+    },
+    "%lld min" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld min"
+          }
+        }
+      }
+    },
+    "%lld min ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld min"
+          }
+        }
+      }
+    },
+    "%lld minutes ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld minutos"
+          }
+        }
+      }
+    },
+    "%lld seconds ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld segundos"
+          }
+        }
+      }
+    },
+    "%lld via points" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld puntos intermedios"
+          }
+        }
+      }
+    },
+    "%llds ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace %lld s"
+          }
+        }
+      }
+    },
+    "1 day ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace 1 día"
+          }
+        }
+      }
+    },
+    "1 hour ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace 1 hora"
+          }
+        }
+      }
+    },
+    "1 minute ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace 1 minuto"
+          }
+        }
+      }
+    },
+    "1 second ago" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "hace 1 segundo"
+          }
+        }
+      }
+    },
+    "1 via point" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1 punto intermedio"
+          }
+        }
+      }
+    },
+    "A commute needs a name." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un trayecto necesita un nombre."
+          }
+        }
+      }
+    },
+    "A route in \"%@\" needs a name." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una ruta de “%@” necesita un nombre."
+          }
+        }
+      }
+    },
+    "A via point of \"%@\"" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un punto intermedio de “%@”"
+          }
+        }
+      }
+    },
+    "Add" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar"
+          }
+        }
+      }
+    },
+    "Add Commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar trayecto"
+          }
+        }
+      }
+    },
+    "Add Commute…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar trayecto…"
+          }
+        }
+      }
+    },
+    "Add Route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agregar ruta"
+          }
+        }
+      }
+    },
+    "Add a route first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero agrega una ruta"
+          }
+        }
+      }
+    },
+    "Add the trip you make most, and Home will show its ETAs." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega el trayecto que haces con más frecuencia y la pantalla de inicio mostrará sus tiempos."
+          }
+        }
+      }
+    },
+    "Add your Google API key: copy ios/Secrets.example.plist to ios/RoutesETA/RoutesETA/Secrets.plist and set GOOGLE_ROUTES_API_KEY." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega tu clave de API de Google: copia ios/Secrets.example.plist a ios/RoutesETA/RoutesETA/Secrets.plist y define GOOGLE_ROUTES_API_KEY."
+          }
+        }
+      }
+    },
+    "Add your first route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agrega tu primera ruta"
+          }
+        }
+      }
+    },
+    "Cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancelar"
+          }
+        }
+      }
+    },
+    "Change %@…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar %@…"
+          }
+        }
+      }
+    },
+    "Checking traffic…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revisando el tráfico…"
+          }
+        }
+      }
+    },
+    "Clear %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Borrar %@"
+          }
+        }
+      }
+    },
+    "Close full screen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerrar pantalla completa"
+          }
+        }
+      }
+    },
+    "Color" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color"
+          }
+        }
+      }
+    },
+    "Color %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Color %@"
+          }
+        }
+      }
+    },
+    "Commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trayecto"
+          }
+        }
+      }
+    },
+    "Commute not found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró el trayecto"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        }
+      }
+    },
+    "Couldn't draw %lld routes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron dibujar %lld rutas"
+          }
+        }
+      }
+    },
+    "Couldn't draw 1 route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo dibujar 1 ruta"
+          }
+        }
+      }
+    },
+    "Couldn't draw the route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo dibujar la ruta"
+          }
+        }
+      }
+    },
+    "Couldn't fetch ETAs." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron obtener los tiempos."
+          }
+        }
+      }
+    },
+    "Couldn't fetch this route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo obtener esta ruta"
+          }
+        }
+      }
+    },
+    "Couldn't find that place" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró ese lugar"
+          }
+        }
+      }
+    },
+    "Couldn't load your commutes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron cargar tus trayectos."
+          }
+        }
+      }
+    },
+    "Couldn't reach Google. Check your connection and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo conectar con Google. Revisa tu conexión e inténtalo de nuevo."
+          }
+        }
+      }
+    },
+    "Couldn't save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo guardar"
+          }
+        }
+      }
+    },
+    "Couldn't save your changes." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudieron guardar tus cambios."
+          }
+        }
+      }
+    },
+    "Delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar"
+          }
+        }
+      }
+    },
+    "Delete \"%@\"?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¿Eliminar “%@”?"
+          }
+        }
+      }
+    },
+    "Delete Commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar trayecto"
+          }
+        }
+      }
+    },
+    "Delete Route" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eliminar ruta"
+          }
+        }
+      }
+    },
+    "Destination" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destino"
+          }
+        }
+      }
+    },
+    "Details" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Detalles"
+          }
+        }
+      }
+    },
+    "Done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo"
+          }
+        }
+      }
+    },
+    "ETA unavailable" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiempo no disponible"
+          }
+        }
+      }
+    },
+    "ETAs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tiempos"
+          }
+        }
+      }
+    },
+    "Edit %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Editar %@"
+          }
+        }
+      }
+    },
+    "Fastest" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La más rápida"
+          }
+        }
+      }
+    },
+    "From" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Origen"
+          }
+        }
+      }
+    },
+    "Full screen" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pantalla completa"
+          }
+        }
+      }
+    },
+    "Google couldn't route that: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google no pudo trazar esa ruta: %@"
+          }
+        }
+      }
+    },
+    "Google rejected the API key. Check its restrictions. (%@)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google rechazó la clave de API. Revisa sus restricciones. (%@)"
+          }
+        }
+      }
+    },
+    "Google returned an error (%lld): %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google devolvió un error (%1$lld): %2$@"
+          }
+        }
+      }
+    },
+    "Google sent a response the app couldn't read (%@)." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Google envió una respuesta que la app no pudo leer (%@)."
+          }
+        }
+      }
+    },
+    "Google's request limit was reached. Try again later." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se alcanzó el límite de solicitudes de Google. Inténtalo más tarde."
+          }
+        }
+      }
+    },
+    "Home" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casa"
+          }
+        }
+      }
+    },
+    "Home needs a precise location to tell which commute starts nearby. Turn on Precise Location in Settings." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La pantalla de inicio necesita una ubicación precisa para saber qué trayecto comienza cerca. Activa la ubicación precisa en Ajustes."
+          }
+        }
+      }
+    },
+    "Home shows the commute that starts where you are." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La pantalla de inicio muestra el trayecto que comienza donde estás."
+          }
+        }
+      }
+    },
+    "Its %lld routes will be deleted too." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sus %lld rutas también se eliminarán."
+          }
+        }
+      }
+    },
+    "Its %lld via points will be deleted too." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sus %lld puntos intermedios también se eliminarán."
+          }
+        }
+      }
+    },
+    "Its 1 route will be deleted too." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su ruta también se eliminará."
+          }
+        }
+      }
+    },
+    "Its 1 via point will be deleted too." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Su punto intermedio también se eliminará."
+          }
+        }
+      }
+    },
+    "Last viewed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Visto por última vez"
+          }
+        }
+      }
+    },
+    "Location is off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ubicación está desactivada"
+          }
+        }
+      }
+    },
+    "Manage Commutes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrar trayectos"
+          }
+        }
+      }
+    },
+    "Manage Commutes…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Administrar trayectos…"
+          }
+        }
+      }
+    },
+    "Map of %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapa de %@"
+          }
+        }
+      }
+    },
+    "Map of %lld routes from %@ to %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapa de %1$lld rutas de %2$@ a %3$@"
+          }
+        }
+      }
+    },
+    "Map of 1 route from %@ to %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mapa de 1 ruta de %1$@ a %2$@"
+          }
+        }
+      }
+    },
+    "Maximum of %lld via points" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Máximo de %lld puntos intermedios"
+          }
+        }
+      }
+    },
+    "More" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Más"
+          }
+        }
+      }
+    },
+    "Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre"
+          }
+        }
+      }
+    },
+    "Near %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca de %@"
+          }
+        }
+      }
+    },
+    "New Commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuevo trayecto"
+          }
+        }
+      }
+    },
+    "No commutes yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aún no hay trayectos"
+          }
+        }
+      }
+    },
+    "No via points" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin puntos intermedios"
+          }
+        }
+      }
+    },
+    "Not now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora no"
+          }
+        }
+      }
+    },
+    "Not set" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sin definir"
+          }
+        }
+      }
+    },
+    "OK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aceptar"
+          }
+        }
+      }
+    },
+    "Order" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Orden"
+          }
+        }
+      }
+    },
+    "Origin" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Origen"
+          }
+        }
+      }
+    },
+    "Precise location is off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ubicación precisa está desactivada"
+          }
+        }
+      }
+    },
+    "Remove via point %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quitar punto intermedio %lld"
+          }
+        }
+      }
+    },
+    "Rename" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar nombre"
+          }
+        }
+      }
+    },
+    "Rename Commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cambiar nombre del trayecto"
+          }
+        }
+      }
+    },
+    "Retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "Route \"%@\" has an invalid color." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ruta “%@” tiene un color no válido."
+          }
+        }
+      }
+    },
+    "Route \"%@\" has more than %lld via points." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ruta “%@” tiene más de %lld puntos intermedios."
+          }
+        }
+      }
+    },
+    "Route %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruta %lld"
+          }
+        }
+      }
+    },
+    "Route not found" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se encontró la ruta"
+          }
+        }
+      }
+    },
+    "Routes" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rutas"
+          }
+        }
+      }
+    },
+    "Search failed" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Falló la búsqueda"
+          }
+        }
+      }
+    },
+    "Search for your %@ address." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Busca la dirección de %@."
+          }
+        }
+      }
+    },
+    "Search places" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Buscar lugares"
+          }
+        }
+      }
+    },
+    "Secrets.plist couldn't be read. Check that it is a valid property list." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No se pudo leer Secrets.plist. Verifica que sea una lista de propiedades válida."
+          }
+        }
+      }
+    },
+    "Set" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Definir"
+          }
+        }
+      }
+    },
+    "Set origin and destination first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Primero define el origen y el destino"
+          }
+        }
+      }
+    },
+    "Show the commute that starts where you are" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Muestra el trayecto que comienza donde estás"
+          }
+        }
+      }
+    },
+    "Tap Edit to set origin and destination" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca Editar para definir el origen y el destino"
+          }
+        }
+      }
+    },
+    "Tap the route to add a via point" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca la ruta para agregar un punto intermedio"
+          }
+        }
+      }
+    },
+    "The route is drawn between them. Set them on the commute screen." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La ruta se dibuja entre ellos. Defínelos en la pantalla del trayecto."
+          }
+        }
+      }
+    },
+    "There is already a commute named \"%@\"." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya existe un trayecto llamado “%@”."
+          }
+        }
+      }
+    },
+    "There is already a route named \"%@\" in this commute." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ya existe una ruta llamada “%@” en este trayecto."
+          }
+        }
+      }
+    },
+    "This can't be undone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Esta acción no se puede deshacer."
+          }
+        }
+      }
+    },
+    "To" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Destino"
+          }
+        }
+      }
+    },
+    "Trip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recorrido"
+          }
+        }
+      }
+    },
+    "Try Again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reintentar"
+          }
+        }
+      }
+    },
+    "Turn it on in Settings to let Home pick the commute that starts where you are." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actívala en Ajustes para que la pantalla de inicio elija el trayecto que comienza donde estás."
+          }
+        }
+      }
+    },
+    "Updated %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualizado %@"
+          }
+        }
+      }
+    },
+    "Use my location to pick the commute" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usar mi ubicación para elegir el trayecto"
+          }
+        }
+      }
+    },
+    "Using your location" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Usando tu ubicación"
+          }
+        }
+      }
+    },
+    "Via point %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Punto intermedio %lld"
+          }
+        }
+      }
+    },
+    "Work" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trabajo"
+          }
+        }
+      }
+    },
+    "Your location stays on this device. It's only used to pick which commute Home shows." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ubicación se queda en este dispositivo. Solo se usa para elegir qué trayecto muestra la pantalla de inicio."
+          }
+        }
+      }
+    },
+    "Your location stays on this device. It's only used to pick which commute to show." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu ubicación se queda en este dispositivo. Solo se usa para elegir qué trayecto mostrar."
+          }
+        }
+      }
+    },
+    "just now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "justo ahora"
+          }
+        }
+      }
+    },
+    "loading ETA" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cargando tiempo"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

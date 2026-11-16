@@ -37,7 +37,7 @@ public final class ConfigStore {
       entries = config.commutes.map { CommuteEntry(commute: $0) }
       loadState = .loaded
     } catch {
-      loadState = .failed("Couldn't load your commutes.")
+      loadState = .failed(String(localized: "Couldn't load your commutes."))
     }
   }
 
@@ -124,7 +124,7 @@ public final class ConfigStore {
       entries = updated
       return nil
     } catch {
-      return "Couldn't save your changes."
+      return String(localized: "Couldn't save your changes.")
     }
   }
 }

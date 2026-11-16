@@ -13,16 +13,17 @@ public enum GoogleRoutesError: Error, Equatable, LocalizedError {
     case .missingKey(let failure):
       failure.errorDescription
     case .network:
-      "Couldn't reach Google. Check your connection and try again."
+      String(localized: "Couldn't reach Google. Check your connection and try again.")
     case .http(let status, let message):
       switch status {
-      case 400: "Google couldn't route that: \(message)"
-      case 401, 403: "Google rejected the API key. Check its restrictions. (\(message))"
-      case 429: "Google's request limit was reached. Try again later."
-      default: "Google returned an error (\(status)): \(message)"
+      case 400: String(localized: "Google couldn't route that: \(message)")
+      case 401, 403:
+        String(localized: "Google rejected the API key. Check its restrictions. (\(message))")
+      case 429: String(localized: "Google's request limit was reached. Try again later.")
+      default: String(localized: "Google returned an error (\(status)): \(message)")
       }
     case .badResponse(let detail):
-      "Google sent a response the app couldn't read (\(detail))."
+      String(localized: "Google sent a response the app couldn't read (\(detail)).")
     }
   }
 }

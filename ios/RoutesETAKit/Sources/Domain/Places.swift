@@ -18,8 +18,17 @@ public enum SavedPlaceKind: String, Codable, CaseIterable, Hashable, Sendable {
   case home
   case work
 
-  /// Also the label written into a commute, e.g. "Home → Work".
+  /// Also the label written into a commute, e.g. "Home → Work" (in the language the person
+  /// had on when they set it: it is their data from then on).
   public var label: String {
+    switch self {
+    case .home: String(localized: "Home")
+    case .work: String(localized: "Work")
+    }
+  }
+
+  /// Language-independent name, for accessibility identifiers (UI tests find views by it).
+  public var identifier: String {
     switch self {
     case .home: "Home"
     case .work: "Work"

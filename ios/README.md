@@ -15,6 +15,27 @@ button. Built mock-first: UI against in-memory services, real networking to
 Tooling: `xcrun swift-format` ships with Xcode; install SwiftLint with
 `brew install swiftlint`.
 
+## Languages (English, Spanish Mexico)
+
+Strings live in two String Catalogs in the **app target** (`RoutesETA/RoutesETA/`):
+`Localizable.xcstrings` (the UI) and `InfoPlist.xcstrings` (the location permission prompt).
+The keys are the English text; `es-MX` is the only translation.
+
+- **Why the app and not the package:** SwiftUI looks `Text("…")`, `Button("…")` and friends up in
+  the main bundle, so one catalog covers `RoutesETAKit` without a `bundle:` on every call.
+- **Xcode does not extract package strings into this catalog.** When you add or change a
+  user-facing string, add or edit its key in `Localizable.xcstrings` by hand, with the exact
+  English text; an interpolation is `%@` (String) or `%lld` (Int), e.g. `Near %@`.
+  `RoutesETATests/LocalizationCatalogTests` fails if a key has no es-MX translation or its
+  placeholders differ from the English.
+- **`Text(someString)` is not localized**, only literals and `LocalizedStringKey`. For text built
+  in code use `String(localized: "…")`, or pass a `LocalizedStringKey`.
+- **Plurals** are one key per wording ("1 route" / "%lld routes"), not catalog plural variations,
+  so the English key is also the fallback in package tests and previews, where no catalog is loaded.
+- Accessibility identifiers stay English (UI tests find views by them); only visible text changes.
+- **Try it:** Edit Scheme → Run → Options → App Language → Spanish (Mexico), or launch with
+  `-AppleLanguages "(es-MX)" -AppleLocale es_MX`. `LocalizationUITests` does the latter.
+
 ## Google API key (needed for route lines and ETAs)
 
 The app calls Google's Routes API directly (no server), so it needs a key. The repo is

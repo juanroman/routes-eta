@@ -101,7 +101,7 @@ struct PlacePickerView: View {
           .frame(width: 56, height: 56)
           .background(kind == .home ? Color.cyan : Color.brown, in: Circle())
         Text(kind.label).font(.subheadline)
-        Text(saved?.detail ?? "Set")
+        Text(saved?.detail ?? String(localized: "Set"))
           .font(.caption)
           .foregroundStyle(.secondary)
           .lineLimit(1)
@@ -112,7 +112,7 @@ struct PlacePickerView: View {
     .contextMenu {
       Button("Change \(kind.label)…", systemImage: "pencil") { assigning = kind }
     }
-    .accessibilityIdentifier("shortcut-\(kind.label)")
+    .accessibilityIdentifier("shortcut-\(kind.identifier)")
   }
 
   private func pick(_ suggestion: PlaceSuggestion) async {

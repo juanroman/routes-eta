@@ -2,9 +2,10 @@ import Foundation
 
 /// "12 seconds ago": how old the ETAs on screen are.
 ///
-/// Written by hand rather than with `RelativeDateTimeFormatter`: the app is English-only, so the
-/// text must not follow the device's language (a Spanish phone would show "hace 1 minuto" next
-/// to an English screen), and exact strings keep the tests independent of the OS's ICU data.
+/// Written by hand rather than with `RelativeDateTimeFormatter`: the wording is ours (so the
+/// Spanish matches the rest of the app's translation, "Actualizado hace 1 minuto"), and exact
+/// strings keep the tests independent of the OS's ICU data. Every wording is its own string
+/// (no plural variations) so the English key doubles as the fallback where no catalog is loaded.
 public enum RelativeAge {
   public enum Style: Sendable {
     /// "1 minute ago".
@@ -15,11 +16,10 @@ public enum RelativeAge {
 
   public static func text(since date: Date, now: Date, style: Style = .full) -> String {
     let seconds = Int(max(0, now.timeIntervalSince(date)))
-    if seconds < 1 { return "just now" }
-    let (value, unit) = amount(seconds: seconds, style: style)
+    if seconds < 1 { return String(localized: "just now") }
     switch style {
-    case .full: return "\(value) \(unit)\(value == 1 ? "" : "s") ago"
-    case .short: return "\(value)\(unit) ago"
+    case .full: return full(seconds: seconds)
+    case .short: return short(seconds: seconds)
     }
   }
 
@@ -36,13 +36,31 @@ public enum RelativeAge {
     return date.addingTimeInterval((age / step).rounded(.down) * step + step)
   }
 
-  private static func amount(seconds: Int, style: Style) -> (Int, String) {
-    let full = style == .full
+  private static func full(seconds: Int) -> String {
     switch seconds {
-    case ..<60: return (seconds, full ? "second" : "s")
-    case ..<3_600: return (seconds / 60, full ? "minute" : " min")
-    case ..<86_400: return (seconds / 3_600, full ? "hour" : " hr")
-    default: return (seconds / 86_400, full ? "day" : " d")
+    case ..<60:
+      return seconds == 1
+        ? String(localized: "1 second ago") : String(localized: "\(seconds) seconds ago")
+    case ..<3_600:
+      let minutes = seconds / 60
+      return minutes == 1
+        ? String(localized: "1 minute ago") : String(localized: "\(minutes) minutes ago")
+    case ..<86_400:
+      let hours = seconds / 3_600
+      return hours == 1
+        ? String(localized: "1 hour ago") : String(localized: "\(hours) hours ago")
+    default:
+      let days = seconds / 86_400
+      return days == 1 ? String(localized: "1 day ago") : String(localized: "\(days) days ago")
+    }
+  }
+
+  private static func short(seconds: Int) -> String {
+    switch seconds {
+    case ..<60: String(localized: "\(seconds)s ago")
+    case ..<3_600: String(localized: "\(seconds / 60) min ago")
+    case ..<86_400: String(localized: "\(seconds / 3_600) hr ago")
+    default: String(localized: "\(seconds / 86_400) d ago")
     }
   }
 }

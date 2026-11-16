@@ -23,22 +23,30 @@ struct LocationSetting: Equatable {
   static func `for`(_ authorization: LocationAuthorization) -> LocationSetting {
     switch authorization {
     case .notDetermined:
-      LocationSetting(title: "Use my location to pick the commute", detail: nil, action: .askSystem)
+      LocationSetting(
+        title: String(localized: "Use my location to pick the commute"), detail: nil,
+        action: .askSystem)
     case .authorized:
       LocationSetting(
-        title: "Using your location",
-        detail: "Home shows the commute that starts where you are.", action: .none)
+        title: String(localized: "Using your location"),
+        detail: String(localized: "Home shows the commute that starts where you are."),
+        action: .none)
     case .denied:
       LocationSetting(
-        title: "Location is off",
-        detail: "Turn it on in Settings to let Home pick the commute that starts where you are.",
+        title: String(localized: "Location is off"),
+        detail: String(
+          localized:
+            "Turn it on in Settings to let Home pick the commute that starts where you are."
+        ),
         action: .openSettings)
     case .reducedAccuracy:
       LocationSetting(
-        title: "Precise location is off",
-        detail:
-          "Home needs a precise location to tell which commute starts nearby. "
-          + "Turn on Precise Location in Settings.",
+        title: String(localized: "Precise location is off"),
+        detail: String(
+          localized: """
+            Home needs a precise location to tell which commute starts nearby. \
+            Turn on Precise Location in Settings.
+            """),
         action: .openSettings)
     }
   }

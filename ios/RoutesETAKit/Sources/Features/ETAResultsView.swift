@@ -70,6 +70,9 @@ struct ETAChip: View {
   }
 
   private var minutes: some View {
-    Text(result.minutes.map { "\($0) min" } ?? "?").font(.title2.bold())
+    Group {
+      if let minutes = result.minutes { Text("\(minutes) min") } else { Text(verbatim: "?") }
+    }
+    .font(.title2.bold())
   }
 }

@@ -189,7 +189,7 @@ private struct ReasonLine: View {
     }
   }
 
-  private func line(_ text: String, symbol: String) -> some View {
+  private func line(_ text: LocalizedStringKey, symbol: String) -> some View {
     Label(text, systemImage: symbol)
       .font(.footnote)
       .foregroundStyle(.secondary)
@@ -233,7 +233,9 @@ private struct HomeETAContent: View {
       failure(message)
     case .loaded(let report, _):
       if report.allFailed {
-        failure("Couldn't fetch ETAs.", detail: report.results.compactMap(\.error).first)
+        failure(
+          String(localized: "Couldn't fetch ETAs."),
+          detail: report.results.compactMap(\.error).first)
       } else {
         // The previous numbers stay while a pull-to-refresh is in flight, dimmed so they are not
         // mistaken for the new ones.

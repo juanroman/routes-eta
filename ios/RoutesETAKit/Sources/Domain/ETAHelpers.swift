@@ -16,8 +16,10 @@ extension ETAReport {
 extension Commute {
   /// Why ETAs can't be fetched yet, or nil when the commute is ready.
   public var etaBlocker: String? {
-    if origin == nil || destination == nil { return "Set origin and destination first" }
-    if routes.isEmpty { return "Add a route first" }
+    if origin == nil || destination == nil {
+      return String(localized: "Set origin and destination first")
+    }
+    if routes.isEmpty { return String(localized: "Add a route first") }
     return nil
   }
 }

@@ -15,9 +15,16 @@ struct CommuteMapScreen: View {
   let commuteID: CommuteEntry.ID
 
   private enum Endpoint: String, Identifiable {
+    // The raw values are identifiers (UI tests find the rows by them), never shown.
     case origin = "From"
     case destination = "To"
     var id: String { rawValue }
+    var title: String {
+      switch self {
+      case .origin: String(localized: "From")
+      case .destination: String(localized: "To")
+      }
+    }
   }
 
   @State private var lines: CommuteLinesModel
@@ -113,13 +120,17 @@ struct CommuteMapScreen: View {
       ProgressView().padding(8).background(.regularMaterial, in: Capsule())
     } else if lines.failedCount > 0 {
       HStack {
-        Text("Couldn't draw \(lines.failedCount) \(lines.failedCount == 1 ? "route" : "routes")")
+        Text(failedBanner(count: lines.failedCount))
           .font(.footnote)
         Button("Retry") { retries += 1 }.font(.footnote.bold())
       }
       .padding(10)
       .background(.regularMaterial, in: Capsule())
     }
+  }
+
+  private func failedBanner(count: Int) -> LocalizedStringKey {
+    count == 1 ? "Couldn't draw 1 route" : "Couldn't draw \(count) routes"
   }
 
   // MARK: Sheet
@@ -182,7 +193,7 @@ struct CommuteMapScreen: View {
     view
       .sheet(item: $picking) { endpoint in
         PlacePickerView(
-          title: endpoint.rawValue,
+          title: endpoint.title,
           selected: endpoint == .origin ? commute.origin : commute.destination,
           service: placeSearch,
           savedPlaces: savedPlaces
@@ -230,8 +241,9 @@ struct CommuteMapScreen: View {
     Button {
       picking = endpoint
     } label: {
-      LabeledContent(endpoint.rawValue) {
-        Text(point?.label ?? "Not set").foregroundStyle(point == nil ? .secondary : .primary)
+      LabeledContent(endpoint.title) {
+        Text(point?.label ?? String(localized: "Not set")).foregroundStyle(
+          point == nil ? .secondary : .primary)
       }
     }
     .accessibilityIdentifier("endpoint-\(endpoint.rawValue)")

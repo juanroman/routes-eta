@@ -53,10 +53,10 @@ private struct CommuteRow: View {
     }
   }
 
-  private var subtitle: String {
+  private var subtitle: LocalizedStringKey {
     let from = commute.origin?.label ?? "?"
     let to = commute.destination?.label ?? "?"
     let count = commute.routes.count
-    return "\(from) → \(to) · \(count) \(count == 1 ? "route" : "routes")"
+    return count == 1 ? "\(from) → \(to) · 1 route" : "\(from) → \(to) · \(count) routes"
   }
 }
