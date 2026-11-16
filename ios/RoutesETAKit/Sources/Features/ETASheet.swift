@@ -46,7 +46,7 @@ struct ETASheet: View {
   private func results(_ report: ETAReport, fetchedAt: Date) -> some View {
     ScrollView {
       VStack(spacing: 12) {
-        ETAResultsView(commute: commute, report: report)
+        ETACard(commute: commute, report: report)
         Text("Updated \(fetchedAt.formatted(date: .omitted, time: .shortened))")
           .font(.footnote).foregroundStyle(.secondary).padding(.top, 4)
         Button("Refresh", systemImage: "arrow.clockwise") { Task { await model.load() } }
