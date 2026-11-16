@@ -18,8 +18,7 @@ public enum SampleData {
           RouteDef(
             name: "City", color: "#2563eb", via: [LatLng(lat: 19.455, lng: -99.205)]),
           RouteDef(name: "Mordor", color: "#dc2626"),
-        ],
-        schedules: [ScheduleRule(weekdays: [.mon, .tue, .wed, .thu, .fri], time: "18:30")]
+        ]
       ),
       Commute(
         name: "Home to Work",
@@ -28,10 +27,6 @@ public enum SampleData {
         routes: [
           RouteDef(
             name: "City", color: "#2563eb", via: [LatLng(lat: 19.455, lng: -99.205)])
-        ],
-        schedules: [
-          ScheduleRule(weekdays: [.mon], time: "06:30"),
-          ScheduleRule(weekdays: [.tue, .wed, .thu, .fri], time: "07:30"),
         ]
       ),
     ]

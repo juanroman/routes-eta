@@ -10,8 +10,8 @@ struct AppRouterTests {
     let router = AppRouter()
     let id = UUID()
     router.push(.commute(id))
-    router.push(.scheduleEditor(commute: id))
-    #expect(router.path == [.commute(id), .scheduleEditor(commute: id)])
+    router.push(.routeEditor(commute: id, route: 0))
+    #expect(router.path == [.commute(id), .routeEditor(commute: id, route: 0)])
     router.popToRoot()
     #expect(router.path.isEmpty)
   }
