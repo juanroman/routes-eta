@@ -8,7 +8,6 @@ public enum AppRoute: Hashable, Sendable {
   case commute(CommuteEntry.ID)
   /// Index, not name: the editor renames routes, which would invalidate a name key.
   case routeEditor(commute: CommuteEntry.ID, route: Int)
-  case scheduleEditor(commute: CommuteEntry.ID)
 }
 
 @MainActor

@@ -13,9 +13,6 @@ public enum ConfigIssue: Hashable, Sendable, CustomStringConvertible {
   case invalidColor(commute: String, route: String)
   case tooManyViaPoints(commute: String, route: String)
   case invalidCoordinate(commute: String, what: String)
-  case emptyWeekdays(commute: String)
-  case invalidTime(commute: String, time: String)
-  case weekdayScheduledTwice(commute: String, weekday: Weekday)
 
   public var description: String {
     switch self {
@@ -33,12 +30,6 @@ public enum ConfigIssue: Hashable, Sendable, CustomStringConvertible {
       "Route \"\(route)\" has more than \(maxViaPoints) via points."
     case .invalidCoordinate(_, let what):
       "\(what) has an invalid coordinate."
-    case .emptyWeekdays:
-      "A schedule needs at least one weekday."
-    case .invalidTime(_, let time):
-      "\"\(time)\" is not a valid time (use HH:MM, 24-hour)."
-    case .weekdayScheduledTwice(_, let weekday):
-      "\(weekday.shortName) is scheduled by more than one rule."
     }
   }
 }
@@ -67,7 +58,7 @@ extension Commute {
     if let destination, !destination.latLng.isValid {
       issues.append(.invalidCoordinate(commute: name, what: "Destination"))
     }
-    return issues + routeIssues() + scheduleIssues()
+    return issues + routeIssues()
   }
 
   private func routeIssues() -> [ConfigIssue] {
@@ -92,35 +83,10 @@ extension Commute {
     return issues
   }
 
-  private func scheduleIssues() -> [ConfigIssue] {
-    var issues: [ConfigIssue] = []
-    var scheduledDays = Set<Weekday>()
-    for rule in schedules {
-      if rule.weekdays.isEmpty { issues.append(.emptyWeekdays(commute: name)) }
-      if !Self.isValidTime(rule.time) {
-        issues.append(.invalidTime(commute: name, time: rule.time))
-      }
-      for day in rule.weekdays where !scheduledDays.insert(day).inserted {
-        issues.append(.weekdayScheduledTwice(commute: name, weekday: day))
-      }
-    }
-    return issues
-  }
-
   /// `^#[0-9a-fA-F]{6}$`
   static func isValidColor(_ value: String) -> Bool {
     let chars = Array(value)
     return chars.count == 7 && chars[0] == "#" && chars.dropFirst().allSatisfy(\.isHexDigit)
-  }
-
-  /// `^([01]\d|2[0-3]):[0-5]\d$`
-  static func isValidTime(_ value: String) -> Bool {
-    let parts = value.split(separator: ":", omittingEmptySubsequences: false)
-    guard parts.count == 2, parts[0].count == 2, parts[1].count == 2,
-      let hour = Int(parts[0]), let minute = Int(parts[1]),
-      parts.allSatisfy({ $0.allSatisfy(\.isASCII) })
-    else { return false }
-    return (0...23).contains(hour) && (0...59).contains(minute)
   }
 }
 

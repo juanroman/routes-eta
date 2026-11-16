@@ -1,10 +1,6 @@
 /// Mirrors `api/app/config_models.py`. The JSON keys are identical, so no
 /// key-mapping is needed; `fixtures/sample-config.json` is the shared contract.
 
-public enum Weekday: String, Codable, CaseIterable, Hashable, Sendable {
-  case mon, tue, wed, thu, fri, sat, sun
-}
-
 public struct LatLng: Codable, Hashable, Sendable {
   public var lat: Double
   public var lng: Double
@@ -43,36 +39,22 @@ public struct RouteDef: Codable, Hashable, Sendable {
   }
 }
 
-public struct ScheduleRule: Codable, Hashable, Sendable {
-  public var weekdays: [Weekday]
-  /// `HH:MM`, 24-hour, local time in `Config.timezone`.
-  public var time: String
-
-  public init(weekdays: [Weekday], time: String = "18:30") {
-    self.weekdays = weekdays
-    self.time = time
-  }
-}
-
 public struct Commute: Codable, Hashable, Sendable {
   public var name: String
   public var origin: NamedPoint?
   public var destination: NamedPoint?
   public var routes: [RouteDef]
-  public var schedules: [ScheduleRule]
 
   public init(
     name: String,
     origin: NamedPoint? = nil,
     destination: NamedPoint? = nil,
-    routes: [RouteDef] = [],
-    schedules: [ScheduleRule] = []
+    routes: [RouteDef] = []
   ) {
     self.name = name
     self.origin = origin
     self.destination = destination
     self.routes = routes
-    self.schedules = schedules
   }
 }
 

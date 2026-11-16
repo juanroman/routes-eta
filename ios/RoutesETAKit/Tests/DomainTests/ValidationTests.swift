@@ -4,9 +4,9 @@ import Testing
 
 struct ValidationTests {
   private func commute(
-    name: String = "A", routes: [RouteDef] = [], schedules: [ScheduleRule] = []
+    name: String = "A", routes: [RouteDef] = []
   ) -> Commute {
-    Commute(name: name, routes: routes, schedules: schedules)
+    Commute(name: name, routes: routes)
   }
 
   @Test func emptyConfigIsValid() {
@@ -54,33 +54,6 @@ struct ValidationTests {
       commute(routes: [RouteDef(name: "R", color: "#000000", via: via)]).validate()
         == [.tooManyViaPoints(commute: "A", route: "R")])
     #expect(commute(routes: [RouteDef(name: "R", color: "#000000", via: ok)]).validate().isEmpty)
-  }
-
-  @Test(arguments: ["24:00", "6:30", "06:60", "0630", "06:3", "ab:cd", "", "06:30:00"])
-  func rejectsBadTimes(time: String) {
-    let issues = commute(schedules: [ScheduleRule(weekdays: [.mon], time: time)]).validate()
-    #expect(issues == [.invalidTime(commute: "A", time: time)])
-  }
-
-  @Test(arguments: ["00:00", "07:30", "23:59"])
-  func acceptsGoodTimes(time: String) {
-    #expect(commute(schedules: [ScheduleRule(weekdays: [.mon], time: time)]).validate().isEmpty)
-  }
-
-  @Test func rejectsWeekdayInTwoRules() {
-    let rules = [
-      ScheduleRule(weekdays: [.mon, .tue], time: "06:30"),
-      ScheduleRule(weekdays: [.tue], time: "07:30"),
-    ]
-    #expect(
-      commute(schedules: rules).validate()
-        == [.weekdayScheduledTwice(commute: "A", weekday: .tue)])
-  }
-
-  @Test func rejectsRuleWithNoWeekdays() {
-    #expect(
-      commute(schedules: [ScheduleRule(weekdays: [])]).validate()
-        == [.emptyWeekdays(commute: "A")])
   }
 
   @Test func rejectsOutOfRangeCoordinates() {

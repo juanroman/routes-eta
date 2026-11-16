@@ -12,9 +12,6 @@ struct CommuteMapScreen: View {
   let placeSearch: any PlaceSearchService
   let savedPlaces: SavedPlacesStore
   let etaService: any ETAService
-  /// Schedules only fed the Pi's cron notifications; the standalone app hides them
-  /// (the data is kept in the config) until something in the app uses them.
-  let showsSchedules: Bool
   let commuteID: CommuteEntry.ID
 
   private enum Endpoint: String, Identifiable {
@@ -39,14 +36,13 @@ struct CommuteMapScreen: View {
   init(
     store: ConfigStore, router: AppRouter, placeSearch: any PlaceSearchService,
     savedPlaces: SavedPlacesStore, etaService: any ETAService,
-    routePreview: any RoutePreviewService, showsSchedules: Bool, commuteID: CommuteEntry.ID
+    routePreview: any RoutePreviewService, commuteID: CommuteEntry.ID
   ) {
     self.store = store
     self.router = router
     self.placeSearch = placeSearch
     self.savedPlaces = savedPlaces
     self.etaService = etaService
-    self.showsSchedules = showsSchedules
     self.commuteID = commuteID
     _lines = State(initialValue: CommuteLinesModel(service: routePreview))
     _selectedETA = State(initialValue: SelectedRouteETAModel(service: etaService))
@@ -176,16 +172,6 @@ struct CommuteMapScreen: View {
         distances: lines.distances, selectedETA: selectedETA.state, selected: $selectedRoute,
         pendingDelete: $pendingRouteDelete,
         errorMessage: $errorMessage, onAdd: { Task { await addRoute() } })
-
-      if showsSchedules {
-        Section("Schedule") {
-          // A button that pushes through the router: a `NavigationLink(value:)` here would
-          // look for its destination in the sheet's own stack, which has none.
-          ScheduleRow(schedules: commute.schedules) {
-            router.push(.scheduleEditor(commute: commuteID))
-          }
-        }
-      }
     }
   }
 
@@ -276,27 +262,5 @@ struct CommuteMapScreen: View {
 
   private func save(_ mutate: @escaping @MainActor (inout Commute) -> Void) {
     Task { errorMessage = await store.updateCommute(id: commuteID, mutate) }
-  }
-}
-
-/// The schedule summary as a row with a chevron.
-private struct ScheduleRow: View {
-  let schedules: [ScheduleRule]
-  let action: () -> Void
-
-  var body: some View {
-    Button(action: action) {
-      HStack {
-        VStack(alignment: .leading, spacing: 2) {
-          ForEach(schedules, id: \.self) { Text($0.summary) }
-          if schedules.isEmpty { Text("Not scheduled").foregroundStyle(.secondary) }
-        }
-        Spacer()
-        Image(systemName: "chevron.right").font(.footnote.bold()).foregroundStyle(.tertiary)
-      }
-      .contentShape(Rectangle())
-    }
-    .buttonStyle(.plain)
-    .accessibilityIdentifier("schedule")
   }
 }

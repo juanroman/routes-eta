@@ -16,7 +16,6 @@ struct RoutesETAApp: App {
   private let location: any LocationProvider
   private let recents: any RecentCommutesRepository
   private let locationPrompt: any LocationPromptRepository
-  private let showsSchedules: Bool
 
   /// Standalone app: commutes are saved on the device (a JSON file), place search
   /// is MapKit, and route lines and ETAs come straight from Google's Routes API
@@ -24,12 +23,10 @@ struct RoutesETAApp: App {
   /// `-mock-services` (UI tests) swaps everything for offline, in-memory, seeded
   /// doubles so each run starts from a clean slate; there the user's location is
   /// `-mock-location home|work|far` (default: location denied, so no prompt appears) and
-  /// `-mock-location-prompt` makes the permission still undecided. `-show-schedules` reveals
-  /// the schedule editor, which is hidden by default (see `CommuteDetailView`).
+  /// `-mock-location-prompt` makes the permission still undecided.
   init() {
     let arguments = CommandLine.arguments
     let useMocks = arguments.contains("-mock-services")
-    showsSchedules = arguments.contains("-show-schedules")
 
     let configRepository: any ConfigRepository =
       useMocks ? InMemoryConfigRepository() : Self.fileRepository()
@@ -77,7 +74,7 @@ struct RoutesETAApp: App {
       RootView(
         store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
         routePreview: routePreview, etaService: etaService, location: location,
-        recents: recents, locationPrompt: locationPrompt, showsSchedules: showsSchedules)
+        recents: recents, locationPrompt: locationPrompt)
     }
   }
 

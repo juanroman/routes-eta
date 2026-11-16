@@ -10,15 +10,13 @@ public struct RootView: View {
   private let routePreview: any RoutePreviewService
   private let etaService: any ETAService
   private let location: any LocationProvider
-  private let showsSchedules: Bool
   @State private var home: HomeModel
 
   public init(
     store: ConfigStore, router: AppRouter, placeSearch: any PlaceSearchService,
     savedPlaces: SavedPlacesStore, routePreview: any RoutePreviewService,
     etaService: any ETAService, location: any LocationProvider,
-    recents: any RecentCommutesRepository, locationPrompt: any LocationPromptRepository,
-    showsSchedules: Bool = false
+    recents: any RecentCommutesRepository, locationPrompt: any LocationPromptRepository
   ) {
     self.store = store
     self.placeSearch = placeSearch
@@ -26,7 +24,6 @@ public struct RootView: View {
     self.routePreview = routePreview
     self.etaService = etaService
     self.location = location
-    self.showsSchedules = showsSchedules
     self.router = router
     _home = State(
       initialValue: HomeModel(
@@ -45,13 +42,11 @@ public struct RootView: View {
         case .commute(let id):
           CommuteMapScreen(
             store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-            etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
+            etaService: etaService, routePreview: routePreview,
             commuteID: id)
         case .routeEditor(let commuteID, let route):
           RouteEditorView(
             store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
-        case .scheduleEditor(let commuteID):
-          ScheduleEditorView(store: store, commuteID: commuteID)
         }
       }
     }
