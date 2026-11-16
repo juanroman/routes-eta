@@ -84,7 +84,21 @@ final class HomeUITests: XCTestCase {
     let app = launch(["-mock-location", "work"])
     XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
     XCTAssertTrue(app.staticTexts["home-updated"].label.hasPrefix("Updated "))
-    XCTAssertEqual(app.staticTexts["google-attribution"].label, "Google Maps")
+    let credit = app.descendants(matching: .any)["google-attribution"]
+    XCTAssertTrue(credit.exists)
+    XCTAssertEqual(credit.label, "Google Maps")
+  }
+
+  /// The credit has to sit in the same bordered card as the numbers it describes.
+  func testTheCreditIsInsideTheSameCardAsTheChips() throws {
+    let app = launch(["-mock-location", "work"])
+    let card = app.descendants(matching: .any)["eta-card"]
+    XCTAssertTrue(card.waitForExistence(timeout: 10))
+    let credit = app.descendants(matching: .any)["google-attribution"]
+    XCTAssertTrue(card.frame.contains(credit.frame))
+    XCTAssertTrue(card.frame.contains(chip("City", in: app).frame))
+    // "Updated…" is ours, so it stays outside.
+    XCTAssertFalse(card.frame.intersects(app.staticTexts["home-updated"].frame))
   }
 
   func testPullingDownFetchesFreshNumbers() throws {
@@ -141,5 +155,16 @@ final class HomeUITests: XCTestCase {
     XCTAssertTrue(app.buttons["home-selector"].waitForExistence(timeout: 10))
     XCTAssertFalse(app.segmentedControls["home-selector"].exists)
     XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
+  }
+
+  func testTheCreditIsStillVisibleAtAccessibilitySizes() throws {
+    let app = launch([
+      "-mock-location", "work",
+      "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityXXXL",
+    ])
+    XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
+    let credit = app.descendants(matching: .any)["google-attribution"]
+    if !credit.isHittable { app.swipeUp() }
+    XCTAssertTrue(credit.exists)
   }
 }

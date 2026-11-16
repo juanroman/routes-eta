@@ -220,6 +220,11 @@ final class RoutesETAUITests: XCTestCase {
     // Exactly one of the two chips is marked as the quickest.
     XCTAssertNotEqual(city.label.contains("Fastest"), mordor.label.contains("Fastest"))
 
+    // Google's credit rides along with the numbers it describes.
+    let credit = app.descendants(matching: .any)["google-attribution"]
+    XCTAssertTrue(credit.exists)
+    XCTAssertEqual(credit.label, "Google Maps")
+
     app.buttons["eta-refresh"].tap()
     XCTAssertTrue(app.descendants(matching: .any)["eta-City"].waitForExistence(timeout: 10))
 

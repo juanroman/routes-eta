@@ -180,9 +180,7 @@ private struct HomeETAContent: View {
       } else {
         // The previous numbers stay while a pull-to-refresh is in flight, dimmed so they are not
         // mistaken for the new ones.
-        ETAResultsView(commute: commute, report: report)
-          .opacity(model.isRefreshing ? 0.4 : 1)
-          .animation(.default, value: model.isRefreshing)
+        ETACard(commute: commute, report: report, isDimmed: model.isRefreshing)
       }
     }
   }
@@ -199,8 +197,7 @@ private struct HomeETAContent: View {
   }
 }
 
-/// "Updated 12 seconds ago" on the left, Google's attribution on the right. The attribution has to
-/// be in the same container as the data it credits.
+/// "Updated 12 seconds ago". Ours, so it sits outside the card that holds Google's data.
 private struct Footer: View {
   let fetchedAt: Date
 
@@ -212,26 +209,10 @@ private struct Footer: View {
       }
       .font(.footnote)
       .foregroundStyle(.secondary)
-      Spacer()
-      GoogleAttribution()
     }
+    .frame(maxWidth: .infinity, alignment: .leading)
     .padding(.horizontal)
     .padding(.vertical, 8)
-  }
-}
-
-/// Google's attribution text for Routes data shown without a Google map: "Google Maps" in a
-/// sans-serif face, between 12 and 16 points, not wrapped and not translated.
-private struct GoogleAttribution: View {
-  @ScaledMetric(relativeTo: .caption) private var scaled: CGFloat = 12
-
-  var body: some View {
-    Text(verbatim: "Google Maps")
-      .font(.system(size: min(max(scaled, 12), 16)))
-      .foregroundStyle(.secondary)
-      .lineLimit(1)
-      .fixedSize()
-      .accessibilityIdentifier("google-attribution")
   }
 }
 
