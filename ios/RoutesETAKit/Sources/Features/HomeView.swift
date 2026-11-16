@@ -2,21 +2,37 @@ import Domain
 import SwiftUI
 
 /// The screen people open the app for: the ETAs of one commute, already chosen, with the same
-/// chips as the "Show ETAs" sheet. Editing commutes lives one tap away behind "Edit".
+/// chips for each route. The commute on screen is also the one "Details" opens (its map and
+/// routes); adding a commute and putting them in order are sheets from the ⋯ menu.
 struct HomeView: View {
   let store: ConfigStore
   let router: AppRouter
   let model: HomeModel
+  let placeSearch: any PlaceSearchService
+  let savedPlaces: SavedPlacesStore
+  let location: any LocationProvider
+
+  @State private var isAdding = false
+  @State private var isManaging = false
+  /// The commute the form just created. It is shown once the form has finished closing:
+  /// a push while a sheet is still dismissing gets dropped.
+  @State private var createdCommute: CommuteEntry.ID?
 
   @Environment(\.scenePhase) private var scenePhase
 
   var body: some View {
     content
       .navigationTitle("ETAs")
-      .toolbar {
-        ToolbarItem(placement: .primaryAction) {
-          Button("Edit") { router.push(.commutes) }
+      .toolbar { toolbar }
+      .sheet(isPresented: $isAdding, onDismiss: openCreatedCommute) {
+        NewCommuteView(store: store, placeSearch: placeSearch, savedPlaces: savedPlaces) { id in
+          createdCommute = id
         }
+      }
+      // Location may have been turned on there, which changes which commute Home picks.
+      .sheet(isPresented: $isManaging) {
+        ManageCommutesView(store: store, location: location)
+          .onDisappear { Task { await model.reopenIfNeeded() } }
       }
       // Once the store has loaded: choose the commute and fetch its ETAs.
       .task(id: store.loadState) {
@@ -29,6 +45,38 @@ struct HomeView: View {
       .onChange(of: router.path.isEmpty) { _, isEmpty in
         if isEmpty { Task { await model.reopenIfNeeded() } }
       }
+  }
+
+  @ToolbarContentBuilder private var toolbar: some ToolbarContent {
+    if let selected = selectedEntry, model.phase == .ready {
+      ToolbarItem(placement: .primaryAction) {
+        Button("Details") { router.push(.commute(selected.id)) }
+          .accessibilityIdentifier("home-details")
+      }
+    }
+    ToolbarItem(placement: .primaryAction) {
+      Menu("More", systemImage: "ellipsis.circle") {
+        Button("Add Commute…", systemImage: "plus") { isAdding = true }
+          .accessibilityIdentifier("home-add")
+        // With one commute there is no order to change and no commute for location to choose.
+        if store.entries.count > 1 {
+          Button("Manage Commutes…", systemImage: "arrow.up.arrow.down") { isManaging = true }
+            .accessibilityIdentifier("home-manage")
+        }
+      }
+      .accessibilityIdentifier("home-more")
+    }
+  }
+
+  /// The new commute becomes the one on screen, then opens so its routes can be set.
+  private func openCreatedCommute() {
+    guard let id = createdCommute else { return }
+    createdCommute = nil
+    guard let name = store.entry(id: id)?.commute.name else { return }
+    Task {
+      await model.select(name)
+      router.push(.commute(id))
+    }
   }
 
   @ViewBuilder private var content: some View {
@@ -47,8 +95,15 @@ struct HomeView: View {
     case .resolving:
       checking
     case .empty:
-      ContentUnavailableView(
-        "No commutes yet", systemImage: "car", description: Text("Tap Edit to add one."))
+      ContentUnavailableView {
+        Label("No commutes yet", systemImage: "car")
+      } description: {
+        Text("Add the trip you make most, and Home will show its ETAs.")
+      } actions: {
+        Button("Add Commute") { isAdding = true }
+          .buttonStyle(.borderedProminent)
+          .accessibilityIdentifier("home-add-commute")
+      }
     case .askingPermission:
       LocationExplainer(
         allow: { Task { await model.allowLocation() } },
@@ -80,9 +135,11 @@ struct HomeView: View {
     }
   }
 
-  private var selectedCommute: Commute? {
-    store.entries.first { $0.commute.name == model.selectedName }?.commute
+  private var selectedEntry: CommuteEntry? {
+    store.entries.first { $0.commute.name == model.selectedName }
   }
+
+  private var selectedCommute: Commute? { selectedEntry?.commute }
 }
 
 /// Segments for a few commutes; a menu once they would not fit (many commutes, or large type).

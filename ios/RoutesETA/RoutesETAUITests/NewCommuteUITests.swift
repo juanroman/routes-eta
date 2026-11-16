@@ -11,8 +11,7 @@ final class NewCommuteUITests: XCTestCase {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]
     app.launch()
-    app.openCommutesList()
-    app.buttons["Add Commute"].tap()
+    app.chooseFromHomeMenu("home-add")
     XCTAssertTrue(app.textFields["commute-name"].waitForExistence(timeout: 10))
     return app
   }
@@ -55,10 +54,16 @@ final class NewCommuteUITests: XCTestCase {
     pick("Satélite", searching: "Sat", for: "To", in: app)
     app.buttons["add-commute-confirm"].tap()
 
-    // It opens the new commute, whose places are already set and need no Edit.
+    // It opens the new commute, whose places are already set and need no Edit. Home chose it
+    // too, so backing out shows it.
     XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 10))
     XCTAssertTrue(app.buttons["Add your first route"].waitForExistence(timeout: 5))
     XCTAssertFalse(app.buttons["endpoint-From"].exists)
+
+    app.navigationBars.buttons["ETAs"].tap()
+    XCTAssertTrue(
+      app.segmentedControls["home-selector"].buttons["Gym"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.segmentedControls["home-selector"].buttons["Gym"].isSelected)
   }
 
   func testCancellingTheFormAddsNothing() throws {
@@ -67,7 +72,8 @@ final class NewCommuteUITests: XCTestCase {
     app.textFields["commute-name"].typeText("Gym")
     app.buttons["Cancel"].tap()
 
-    XCTAssertTrue(app.staticTexts["Work to Home"].waitForExistence(timeout: 5))
-    XCTAssertFalse(app.staticTexts["Gym"].exists)
+    XCTAssertTrue(
+      app.segmentedControls["home-selector"].buttons["Work to Home"].waitForExistence(timeout: 5))
+    XCTAssertFalse(app.segmentedControls["home-selector"].buttons["Gym"].exists)
   }
 }

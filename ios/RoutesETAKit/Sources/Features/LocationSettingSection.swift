@@ -5,7 +5,7 @@ import SwiftUI
   import UIKit
 #endif
 
-/// What the commutes list says about location, and what tapping it does. This is the way back in
+/// What Manage Commutes says about location, and what tapping it does. This is the way back in
 /// after "Not now" (the system was never asked, so iOS lists nothing in Settings), and the way to
 /// Settings after a refusal or after turning Precise Location off.
 struct LocationSetting: Equatable {
@@ -44,8 +44,8 @@ struct LocationSetting: Equatable {
   }
 }
 
-/// A section for the bottom of the commutes list. Only worth showing with several commutes:
-/// with one there is nothing to choose.
+/// A section of Manage Commutes, which is only offered with several commutes: with one there
+/// is nothing for location to choose.
 struct LocationSettingSection: View {
   let location: any LocationProvider
 

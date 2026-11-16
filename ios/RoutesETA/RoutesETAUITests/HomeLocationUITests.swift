@@ -1,7 +1,7 @@
 import XCTest
 
 /// The location permission on Home: the explanation shown before the system prompt, "Not now",
-/// and the row in the commutes list that is the way back in.
+/// and the row in Manage Commutes that is the way back in.
 @MainActor
 final class HomeLocationUITests: XCTestCase {
   override func setUpWithError() throws {
@@ -44,19 +44,19 @@ final class HomeLocationUITests: XCTestCase {
     XCTAssertTrue(chip("Mordor", in: app).waitForExistence(timeout: 10))
 
     // Leaving and coming back must not bring the explanation back.
-    app.buttons["Edit"].tap()
-    XCTAssertTrue(app.navigationBars["Commutes"].waitForExistence(timeout: 5))
-    app.navigationBars.buttons.firstMatch.tap()
+    app.buttons["home-details"].tap()
+    XCTAssertTrue(app.buttons["add-route"].waitForExistence(timeout: 5))
+    app.navigationBars.buttons["ETAs"].tap()
     XCTAssertTrue(chip("Mordor", in: app).waitForExistence(timeout: 10))
     XCTAssertFalse(app.buttons["location-continue"].exists)
   }
 
-  func testTheCommutesListIsTheWayBackInAfterNotNow() throws {
+  func testManageCommutesIsTheWayBackInAfterNotNow() throws {
     let app = launchUndecided(at: "home")
     app.buttons["location-not-now"].tap()
     XCTAssertTrue(chip("Mordor", in: app).waitForExistence(timeout: 10))
 
-    app.buttons["Edit"].tap()
+    app.chooseFromHomeMenu("home-manage")
     let row = app.buttons["location-setting-action"]
     XCTAssertTrue(row.waitForExistence(timeout: 5))
     XCTAssertTrue(row.label.contains("Use my location to pick the commute"))
@@ -67,17 +67,16 @@ final class HomeLocationUITests: XCTestCase {
         .evaluate(with: working.waitForExistence(timeout: 5) ? working : nil))
 
     // Home now chooses by location: at home, that is "Home to Work", which has no Mordor.
-    app.navigationBars.buttons.firstMatch.tap()
+    app.buttons["Done"].tap()
     XCTAssertTrue(chip("Mordor", in: app).waitForNonExistence(timeout: 10))
     XCTAssertEqual(app.staticTexts["home-reason"].label, "Near Home")
   }
 
-  func testARefusalIsExplainedInTheListWithAWayToSettings() throws {
+  func testARefusalIsExplainedInManageCommutesWithAWayToSettings() throws {
     let app = XCUIApplication()
     app.launchArguments = ["-mock-services"]  // location denied
     app.launch()
-    XCTAssertTrue(app.buttons["Edit"].waitForExistence(timeout: 10))
-    app.buttons["Edit"].tap()
+    app.chooseFromHomeMenu("home-manage")
 
     let row = app.buttons["location-setting-action"]
     XCTAssertTrue(row.waitForExistence(timeout: 5))

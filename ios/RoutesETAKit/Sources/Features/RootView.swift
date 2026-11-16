@@ -36,25 +36,24 @@ public struct RootView: View {
 
   public var body: some View {
     NavigationStack(path: $router.path) {
-      HomeView(store: store, router: router, model: home)
-        .navigationDestination(for: AppRoute.self) { route in
-          switch route {
-          case .commutes:
-            CommutesListView(
-              store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-              location: location)
-          case .commute(let id):
-            CommuteMapScreen(
-              store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
-              etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
-              commuteID: id)
-          case .routeEditor(let commuteID, let route):
-            RouteEditorView(
-              store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
-          case .scheduleEditor(let commuteID):
-            ScheduleEditorView(store: store, commuteID: commuteID)
-          }
+      HomeView(
+        store: store, router: router, model: home, placeSearch: placeSearch,
+        savedPlaces: savedPlaces, location: location
+      )
+      .navigationDestination(for: AppRoute.self) { route in
+        switch route {
+        case .commute(let id):
+          CommuteMapScreen(
+            store: store, router: router, placeSearch: placeSearch, savedPlaces: savedPlaces,
+            etaService: etaService, routePreview: routePreview, showsSchedules: showsSchedules,
+            commuteID: id)
+        case .routeEditor(let commuteID, let route):
+          RouteEditorView(
+            store: store, routePreview: routePreview, commuteID: commuteID, routeIndex: route)
+        case .scheduleEditor(let commuteID):
+          ScheduleEditorView(store: store, commuteID: commuteID)
         }
+      }
     }
     .task {
       await savedPlaces.load()

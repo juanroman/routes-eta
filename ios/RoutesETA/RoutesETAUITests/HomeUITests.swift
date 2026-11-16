@@ -132,17 +132,34 @@ final class HomeUITests: XCTestCase {
 
   // MARK: - Editing
 
-  func testEditOpensTheCommutesListAndBackReturnsToHome() throws {
+  func testDetailsOpensTheCommuteOnScreenAndBackReturnsToHome() throws {
     let app = launch(["-mock-location", "work"])
     XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
 
-    app.buttons["Edit"].tap()
-    XCTAssertTrue(app.navigationBars["Commutes"].waitForExistence(timeout: 5))
-    XCTAssertTrue(app.staticTexts["Work to Home"].exists)
+    app.buttons["home-details"].tap()
+    XCTAssertTrue(app.navigationBars["Work to Home"].waitForExistence(timeout: 5))
 
-    app.navigationBars.buttons.firstMatch.tap()
+    app.navigationBars.buttons["ETAs"].tap()
     XCTAssertTrue(app.navigationBars["ETAs"].waitForExistence(timeout: 5))
     XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
+  }
+
+  func testDetailsFollowsTheCommuteYouPick() throws {
+    let app = launch(["-mock-location", "work"])
+    XCTAssertTrue(chip("City", in: app).waitForExistence(timeout: 10))
+    segment("Home to Work", in: app).tap()
+    XCTAssertTrue(chip("Mordor", in: app).waitForNonExistence(timeout: 10))
+
+    app.buttons["home-details"].tap()
+    XCTAssertTrue(app.navigationBars["Home to Work"].waitForExistence(timeout: 5))
+  }
+
+  func testTheMenuOffersAddAndManageWithSeveralCommutes() throws {
+    let app = launch(["-mock-location", "work"])
+    XCTAssertTrue(app.buttons["home-more"].waitForExistence(timeout: 10))
+    app.buttons["home-more"].tap()
+    XCTAssertTrue(app.buttons["home-add"].waitForExistence(timeout: 5))
+    XCTAssertTrue(app.buttons["home-manage"].exists)
   }
 
   // MARK: - Large type
