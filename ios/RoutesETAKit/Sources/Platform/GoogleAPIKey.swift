@@ -18,10 +18,13 @@ public enum GoogleAPIKey {
     public var errorDescription: String? {
       switch self {
       case .missingFile, .missingKey:
-        "Add your Google API key: copy ios/Secrets.example.plist to "
-          + "ios/RoutesETA/RoutesETA/Secrets.plist and set GOOGLE_ROUTES_API_KEY."
+        String(
+          localized: """
+            Add your Google API key: copy ios/Secrets.example.plist to \
+            ios/RoutesETA/RoutesETA/Secrets.plist and set GOOGLE_ROUTES_API_KEY.
+            """)
       case .unreadable:
-        "Secrets.plist couldn't be read. Check that it is a valid property list."
+        String(localized: "Secrets.plist couldn't be read. Check that it is a valid property list.")
       }
     }
   }

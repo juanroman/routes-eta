@@ -1,0 +1,18 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Location permission prompt",
+      "extractionState" : "manual",
+      "localizations" : {
+        "es-MX" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se usa en este dispositivo para mostrar el trayecto que comienza donde estás. Tu ubicación nunca se envía a ningún lado."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

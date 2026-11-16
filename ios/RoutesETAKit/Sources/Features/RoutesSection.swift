@@ -130,9 +130,9 @@ private struct RouteRow: View {
     if isSelected {
       switch eta {
       case .idle: break
-      case .loading: parts.append("loading ETA")
-      case .loaded(let minutes): parts.append("\(minutes) min")
-      case .failed: parts.append("ETA unavailable")
+      case .loading: parts.append(String(localized: "loading ETA"))
+      case .loaded(let minutes): parts.append(String(localized: "\(minutes) min"))
+      case .failed: parts.append(String(localized: "ETA unavailable"))
       }
     }
     return parts.joined(separator: ", ")

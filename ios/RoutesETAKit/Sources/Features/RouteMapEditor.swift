@@ -59,7 +59,7 @@ struct RouteMapEditor: View {
       ProgressView().padding(8).background(.regularMaterial, in: Capsule()).padding(8)
     case .failed:
       VStack(spacing: 6) {
-        Text(model.failureMessage ?? "Couldn't draw the route")
+        Text(model.failureMessage ?? String(localized: "Couldn't draw the route"))
           .font(.footnote)
           .multilineTextAlignment(.center)
           .lineLimit(4)
@@ -103,7 +103,7 @@ struct ViaBar: View {
     .padding(.vertical, 8)
   }
 
-  private var summary: String {
+  private var summary: LocalizedStringKey {
     switch route.via.count {
     case 0: "No via points"
     case 1: "1 via point"

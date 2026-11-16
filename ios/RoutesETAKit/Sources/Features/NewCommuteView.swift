@@ -13,9 +13,16 @@ struct NewCommuteView: View {
   let onCreated: (CommuteEntry.ID) -> Void
 
   private enum Endpoint: String, Identifiable {
+    // The raw values are identifiers (UI tests find the rows by them), never shown.
     case origin = "From"
     case destination = "To"
     var id: String { rawValue }
+    var title: String {
+      switch self {
+      case .origin: String(localized: "From")
+      case .destination: String(localized: "To")
+      }
+    }
   }
 
   @State private var name = ""
@@ -51,7 +58,7 @@ struct NewCommuteView: View {
       }
       .sheet(item: $picking) { endpoint in
         PlacePickerView(
-          title: endpoint.rawValue,
+          title: endpoint.title,
           selected: endpoint == .origin ? origin : destination,
           service: placeSearch,
           savedPlaces: savedPlaces
@@ -76,8 +83,9 @@ struct NewCommuteView: View {
     Button {
       picking = endpoint
     } label: {
-      LabeledContent(endpoint.rawValue) {
-        Text(point?.label ?? "Not set").foregroundStyle(point == nil ? .secondary : .primary)
+      LabeledContent(endpoint.title) {
+        Text(point?.label ?? String(localized: "Not set")).foregroundStyle(
+          point == nil ? .secondary : .primary)
       }
     }
     .accessibilityIdentifier("endpoint-\(endpoint.rawValue)")

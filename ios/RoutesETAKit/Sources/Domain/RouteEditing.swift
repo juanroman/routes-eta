@@ -14,16 +14,21 @@ public enum RoutePalette {
 }
 
 extension Commute {
+  private static func defaultRouteName(_ number: Int) -> String {
+    String(localized: "Route \(number)")
+  }
+
   /// Appends a new route named "Route N" (first free N) in the next unused
   /// palette color, and returns its index.
   @discardableResult
   public mutating func addRoute() -> Int {
     let names = Set(routes.map(\.name))
     var number = routes.count + 1
-    while names.contains("Route \(number)") { number += 1 }
+    while names.contains(Self.defaultRouteName(number)) { number += 1 }
     routes.append(
       RouteDef(
-        name: "Route \(number)", color: RoutePalette.nextColor(avoiding: routes.map(\.color))))
+        name: Self.defaultRouteName(number),
+        color: RoutePalette.nextColor(avoiding: routes.map(\.color))))
     return routes.count - 1
   }
 

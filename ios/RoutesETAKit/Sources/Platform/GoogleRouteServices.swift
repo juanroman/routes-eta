@@ -44,7 +44,7 @@ public struct GoogleETAService: ETAService {
     }
     if let blocker = commute.etaBlocker { throw ETAServiceError.notReady(blocker) }
     guard let origin = commute.origin?.latLng, let destination = commute.destination?.latLng else {
-      throw ETAServiceError.notReady("Set origin and destination first")
+      throw ETAServiceError.notReady(String(localized: "Set origin and destination first"))
     }
     // Without a key every route would fail identically; say so once, up front.
     try client.validateKey()

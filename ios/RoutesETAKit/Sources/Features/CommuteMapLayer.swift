@@ -32,11 +32,12 @@ struct CommuteMapLayer {
 
   var summary: String {
     guard let origin = commute.origin, let destination = commute.destination else {
-      return "Map of \(commute.name)"
+      return String(localized: "Map of \(commute.name)")
     }
     let count = commute.routes.count
-    let noun = count == 1 ? "route" : "routes"
-    return "Map of \(count) \(noun) from \(origin.label) to \(destination.label)"
+    return count == 1
+      ? String(localized: "Map of 1 route from \(origin.label) to \(destination.label)")
+      : String(localized: "Map of \(count) routes from \(origin.label) to \(destination.label)")
   }
 
   @MapContentBuilder var content: some MapContent {
